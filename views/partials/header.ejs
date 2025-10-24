@@ -1,0 +1,77 @@
+<!-- views/partials/header.ejs -->
+<header id="main-header">
+    <div class="header-top">
+        <div class="header-left">
+            <a href="/" class="logo-link">
+                <img src="/images/logo.png" alt="Logo" class="logo">
+                <h1 class="site-title">Artesanías Sunset</h1>
+            </a>
+        </div>
+        
+        <div class="header-right">
+            <% if (user) { %>
+                <div class="user-icon">
+                    <a href="/auth/profile" class="user-link">
+                        <i class="<%= icons.user %> icon"></i>
+                        <span class="user-name"><%= user.first_name %></span>
+                    </a>
+                </div>
+            <% } %>
+            
+            <div class="cart-icon">
+                <a href="/cart" class="cart-link">
+                    <i class="<%= icons.cart %> icon"></i>
+                    <span class="cart-count" id="cart-count">0</span>
+                </a>
+            </div>
+            
+            <button class="hamburger-menu" id="hamburger-menu" aria-label="Toggle navigation" aria-controls="mobile-nav" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </div>
+    
+    <form class="header-search" action="/search" method="GET" role="search">
+        <input type="text" id="search-input" name="q" placeholder="Buscar productos..." class="search-bar">
+        <button type="submit" id="search-btn" class="search-button" aria-label="Search">
+            <i class="<%= icons.search %> icon"></i>
+        </button>
+    </form>
+    
+    <div class="nav-overlay" id="nav-overlay"></div>
+    
+    <nav class="mobile-nav" id="mobile-nav">
+        <div class="nav-header">
+            <h3 class="nav-title">Menú</h3>
+            <button class="nav-close" id="nav-close" aria-label="Close menu">
+                <i class="<%= icons.close %> icon"></i>
+            </button>
+        </div>
+        <ul class="nav-menu">
+            <% if (user) { %>
+                <li class="nav-user-info">
+                    <i class="<%= icons.userCircle %> nav-icon"></i>
+                    <span><%= user.first_name %> <%= user.last_name %></span>
+                </li>
+                <% if (isAdmin) { %>
+                    <li><a href="/admin"><i class="<%= icons.admin %> nav-icon"></i> Panel Admin</a></li>
+                    <li><a href="/analytics"><i class="<%= icons.analytics %> nav-icon"></i> Analytics</a></li>
+                <% } %>
+                <li><a href="/auth/profile"><i class="<%= icons.profile %> nav-icon"></i> Mi Perfil</a></li>
+            <% } else { %>
+                <li><a href="/auth/login"><i class="<%= icons.login %> nav-icon"></i> Iniciar Sesión</a></li>
+                <li><a href="/auth/register"><i class="<%= icons.register %> nav-icon"></i> Crear Cuenta</a></li>
+            <% } %>
+            
+            <li><a href="/"><i class="<%= icons.home %> nav-icon"></i> Inicio</a></li>
+            <li><a href="/catalog"><i class="<%= icons.catalog %> nav-icon"></i> Catálogo</a></li>
+            <li><a href="/blog"><i class="<%= icons.blog %> nav-icon"></i> Blog</a></li>
+            <li><a href="/cart"><i class="<%= icons.cart %> nav-icon"></i> Carrito</a></li>
+            <li><a href="/contact"><i class="<%= icons.contact %> nav-icon"></i> Contacto</a></li>
+            
+            <% if (user) { %>
+                <li><a href="/auth/logout"><i class="<%= icons.logout %> nav-icon"></i> Cerrar Sesión</a></li>
+            <% } %>
+        </ul>
+    </nav>
+</header>

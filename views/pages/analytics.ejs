@@ -1,0 +1,540 @@
+<!-- analytics.ejs -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    
+    <!-- CSS -->
+    
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/footer.css">
+    <link rel="stylesheet" href="/css/analytics.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9998;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 9999;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--c5);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal-content {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -40%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+        }
+    </style>
+    
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</head>
+<body>
+    <%- include('../partials/header') %>
+
+    <main class="analytics-container">
+        <!-- Encabezado -->
+        <div class="analytics-header">
+            <h1>📊 Dashboard de Analítica</h1>
+            <p>Métricas y estadísticas del negocio</p>
+        </div>
+
+        <!-- KPIs Principales -->
+        <section class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon">👥</div>
+                <div class="kpi-content">
+                    <h3>Clientes</h3>
+                    <p class="kpi-value"><%= kpis.total_customers %></p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon">📦</div>
+                <div class="kpi-content">
+                    <h3>Productos</h3>
+                    <p class="kpi-value"><%= kpis.total_products %></p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon">🛒</div>
+                <div class="kpi-content">
+                    <h3>Órdenes</h3>
+                    <p class="kpi-value"><%= kpis.total_orders %></p>
+                </div>
+            </div>
+
+            <div class="kpi-card highlight">
+                <div class="kpi-icon">💰</div>
+                <div class="kpi-content">
+                    <h3>Ingresos Totales</h3>
+                    <%
+                    const revenue = parseFloat(kpis.total_revenue);
+                    let formattedRevenue;
+                    if (revenue >= 1000000000000) {
+                        formattedRevenue = (revenue / 1000000000000).toFixed(1).replace(/\.0$/, '') + 'T';
+                    } else if (revenue >= 1000000000) {
+                        formattedRevenue = (revenue / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+                    } else if (revenue >= 1000000) {
+                        formattedRevenue = (revenue / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+                    } else if (revenue >= 1000) {
+                        formattedRevenue = (revenue / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+                    } else {
+                        formattedRevenue = revenue.toFixed(2);
+                    }
+                    %>
+                    <p class="kpi-value">Q <%= formattedRevenue %></p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon">📈</div>
+                <div class="kpi-content">
+                    <h3>Ticket Promedio</h3>
+                    <%
+                    const avgTicket = parseFloat(kpis.avg_ticket);
+                    let formattedTicket;
+                    if (avgTicket >= 1000000) {
+                        formattedTicket = (avgTicket / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+                    } else if (avgTicket >= 1000) {
+                        formattedTicket = (avgTicket / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+                    } else {
+                        formattedTicket = avgTicket.toFixed(2);
+                    }
+                    %>
+                    <p class="kpi-value">Q <%= formattedTicket %></p>
+                </div>
+            </div>
+
+            <div class="kpi-card alert">
+                <div class="kpi-icon">⏳</div>
+                <div class="kpi-content">
+                    <h3>Órdenes Pendientes</h3>
+                    <p class="kpi-value"><%= kpis.pending_orders %></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ventas por Moneda -->
+        <% if (salesByCurrency && salesByCurrency.length > 0) { %>
+        <section class="data-section">
+            <h2>💱 Ventas por Moneda</h2>
+            <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <% salesByCurrency.forEach(currency => { %>
+                <div class="kpi-card">
+
+                    <div class="kpi-content">
+                        <h3><%= currency.currency_code %></h3>
+                        <p class="kpi-value"><%= parseInt(currency.total_orders) %> órdenes</p>
+                        <%
+                        const revenue = parseFloat(currency.revenue);
+                        const symbol = currency.currency_code === 'GTQ' ? 'Q' : '$';
+                        let formatted;
+                        if (revenue >= 1000000) {
+                            formatted = (revenue / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+                        } else if (revenue >= 1000) {
+                            formatted = (revenue / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+                        } else {
+                            formatted = revenue.toFixed(2);
+                        }
+                        %>
+                        <p style="color: var(--c6); font-size: 1.2rem; margin-top: 0.5rem;">
+                            <%= symbol %> <%= formatted %>
+                        </p>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+        </section>
+        <% } %>
+
+        <!-- Gráficos -->
+        <section class="charts-section">
+            <div class="chart-container">
+                <h2>📊 Ventas por Categoría</h2>
+                <canvas id="salesByCategoryChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h2>📈 Ingresos Mensuales</h2>
+                <canvas id="monthlyRevenueChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Top Productos -->
+        <section class="data-section">
+            <h2>🏆 Top 5 Productos Más Vendidos</h2>
+            <div class="table-responsive">
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th>Unidades Vendidas</th>
+                            <th>Ingresos</th>
+                            <th>Stock Actual</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% topProducts.forEach((product, index) => { %>
+                        <tr>
+                            <td><%= index + 1 %></td>
+                            <td><strong><%= product.product_name %></strong></td>
+                            <td><%= product.category_name %></td>
+                            <td><%= product.total_sold || 0 %></td>
+                            <td>Q <%= parseFloat(product.total_revenue || 0).toLocaleString('es-GT', {minimumFractionDigits: 2}) %></td>
+                            <td class="<%= product.current_stock < 10 ? 'low-stock' : '' %>">
+                                <%= product.current_stock %>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Alertas de Stock Bajo -->
+        <% if (lowStock && lowStock.length > 0) { %>
+        <section class="data-section alert-section">
+            <h2>⚠️ Productos con Stock Bajo (< 10 unidades)</h2>
+            <div class="table-responsive">
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th>Stock</th>
+                            <th>Vendidos (30 días)</th>
+                            <th>Precio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% lowStock.forEach(product => { %>
+                        <tr>
+                            <td><strong><%= product.product_name %></strong></td>
+                            <td><%= product.category_name %></td>
+                            <td class="low-stock"><strong><%= product.stock %></strong></td>
+                            <td><%= product.sold_last_30_days || 0 %></td>
+                            <td>Q <%= parseFloat(product.price).toLocaleString('es-GT', {minimumFractionDigits: 2}) %></td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <% } %>
+
+        <!-- Tarjetas de Vistas -->
+        <section class="views-section">
+            <h2>📋 Reportes Detallados</h2>
+            
+            <div class="views-grid">
+                <div class="view-card" data-view="sales" data-endpoint="/analytics/sales-by-category">
+                    <span class="view-icon">💰</span>
+                    <h3>Ventas por Categoría</h3>
+                    <p>Ver análisis completo</p>
+                </div>
+
+                <div class="view-card" data-view="products" data-endpoint="/analytics/top-products">
+                    <span class="view-icon">🏆</span>
+                    <h3>Top Productos</h3>
+                    <p>Los 10 más vendidos</p>
+                </div>
+
+                <div class="view-card" data-view="customers" data-endpoint="/analytics/customer-orders">
+                    <span class="view-icon">👥</span>
+                    <h3>Valor de Clientes</h3>
+                    <p>Lifetime value</p>
+                </div>
+
+                <div class="view-card" data-view="shipments" data-endpoint="/analytics/pending-shipments">
+                    <span class="view-icon">📦</span>
+                    <h3>Órdenes Pendientes</h3>
+                    <p>Sin enviar o en proceso</p>
+                </div>
+
+                <div class="view-card" data-view="revenue" data-endpoint="/analytics/monthly-revenue">
+                    <span class="view-icon">📈</span>
+                    <h3>Ingresos Mensuales</h3>
+                    <p>Tendencias por mes</p>
+                </div>
+
+                <div class="view-card" data-view="stock" data-endpoint="/analytics/low-stock">
+                    <span class="view-icon">⚠️</span>
+                    <h3>Stock Bajo</h3>
+                    <p>Necesitan reabastecimiento</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="modal" id="dataModal">
+        <div class="modal-header">
+            <h2 id="modalTitle"></h2>
+            <button class="modal-close" id="modalClose">&times;</button>
+        </div>
+        <div class="modal-content" id="modalContent">
+            <div class="loading">Cargando datos...</div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="downloadBtn">📥 Descargar CSV</button>
+            <button class="btn btn-primary" id="closeModalBtn">Cerrar</button>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <script>
+        const salesByCategory = <%- JSON.stringify(salesByCategory) %>;
+        const monthlyRevenue = <%- JSON.stringify(monthlyRevenue) %>;
+
+        // Gráfico de Ventas por Categoría
+        const ctxSales = document.getElementById('salesByCategoryChart').getContext('2d');
+        new Chart(ctxSales, {
+            type: 'bar',
+            data: {
+                labels: salesByCategory.map(item => item.category_name),
+                datasets: [{
+                    label: 'Ingresos (Q)',
+                    data: salesByCategory.map(item => parseFloat(item.revenue || 0)),
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Q ' + value.toLocaleString('es-GT');
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Q ' + context.parsed.y.toLocaleString('es-GT', {minimumFractionDigits: 2});
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Ingresos Mensuales
+        const ctxRevenue = document.getElementById('monthlyRevenueChart').getContext('2d');
+        new Chart(ctxRevenue, {
+            type: 'line',
+            data: {
+                labels: monthlyRevenue.map(item => {
+                    const date = new Date(item.month);
+                    return date.toLocaleDateString('es-GT', { year: 'numeric', month: 'short' });
+                }).reverse(),
+                datasets: [{
+                    label: 'Ingresos',
+                    data: monthlyRevenue.map(item => parseFloat(item.revenue || 0)).reverse(),
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Q ' + value.toLocaleString('es-GT');
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Q ' + context.parsed.y.toLocaleString('es-GT', {minimumFractionDigits: 2});
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Modal functionality
+        const modal = $('#dataModal');
+        const overlay = $('#modalOverlay');
+        let currentEndpoint = '';
+        let currentData = [];
+
+        $('.view-card').on('click', async function() {
+            const title = $(this).find('h3').text();
+            const endpoint = $(this).data('endpoint');
+            currentEndpoint = endpoint;
+            
+            $('#modalTitle').text(title);
+            $('#modalContent').html('<div class="loading">Cargando datos...</div>');
+            modal.show();
+            overlay.show();
+            
+            try {
+                const response = await fetch(endpoint);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    currentData = result.data;
+                    displayData(result.data);
+                } else {
+                    $('#modalContent').html('<p>No hay datos disponibles</p>');
+                }
+            } catch (error) {
+                $('#modalContent').html('<p>Error al cargar datos</p>');
+            }
+        });
+
+        function displayData(data) {
+            if (!data || data.length === 0) {
+                $('#modalContent').html('<p>No hay datos disponibles</p>');
+                return;
+            }
+
+            const headers = Object.keys(data[0]);
+            let html = '<div class="table-responsive"><table class="analytics-table"><thead><tr>';
+            
+            headers.forEach(header => {
+                html += `<th>${header}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            data.forEach(row => {
+                html += '<tr>';
+                headers.forEach(header => {
+                    const value = row[header];
+                    html += `<td>${value !== null && value !== undefined ? value : '-'}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table></div>';
+            $('#modalContent').html(html);
+        }
+
+        function closeModal() {
+            modal.hide();
+            overlay.hide();
+        }
+
+        $('#modalClose, #closeModalBtn, #modalOverlay').on('click', closeModal);
+
+        $('#downloadBtn').on('click', function() {
+            const type = currentEndpoint.split('/').pop();
+            window.location.href = `/analytics/download-report?type=${type}`;
+        });
+    </script>
+    
+    <script src="/js/header.js"></script>
+    <script src="/js/cart.js"></script>
+</body>
+</html>

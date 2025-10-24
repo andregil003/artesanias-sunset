@@ -1,0 +1,37 @@
+<!-- views/partials/footer.ejs -->
+<footer id="main-footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>Contacto</h3>
+            <p><i class="<%= icons.phone %> footer-icon"></i> +502 4129-8574</p>
+            <p><i class="<%= icons.contact %> footer-icon"></i> <%= contactEmail %></p>
+            <p><i class="<%= icons.location %> footer-icon"></i> Guatemala</p>
+        </div>
+        
+        <div class="footer-section">
+            <h3>Enlaces</h3>
+            <ul class="footer-links">
+                <li><a href="/"><i class="<%= icons.home %> footer-icon"></i> Inicio</a></li>
+                <li><a href="/catalog"><i class="<%= icons.catalogBag %> footer-icon"></i> Catálogo</a></li>
+                <li><a href="/contact"><i class="<%= icons.contactMessage %> footer-icon"></i> Contacto</a></li>
+            </ul>
+        </div>
+        
+        <div class="footer-section">
+            <a href="https://wa.me/<%= whatsappNumber %>" 
+               class="whatsapp-btn" target="_blank" rel="noopener">
+                <i class="<%= icons.whatsapp %> btn-icon"></i>
+                Chatear por WhatsApp
+            </a>
+        </div>
+    </div>
+    
+    <div class="footer-bottom">
+        <p>
+            <i class="<%= icons.copyright %> footer-icon-small"></i>
+            2025 Artesanías Sunset. Hecho con 
+            <i class="<%= icons.heart %> footer-icon-small heart"></i> 
+            en Guatemala.
+        </p>
+    </div>
+</footer>

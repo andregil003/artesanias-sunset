@@ -1,0 +1,133 @@
+<!-- views/pages/cart.ejs -->
+<main id="main-content">
+  <div class="container">
+    <div class="cart-header">
+      <h1>Carrito de Compras</h1>
+      <a href="/catalog" class="continue-shopping">← Continuar Comprando</a>
+    </div>
+
+    <%
+    let subtotal = 0;
+    let shipping = 0;
+    let total = 0;
+    
+    if (cartItems && cartItems.length > 0) {
+      subtotal = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+      shipping = 25.00;
+      total = subtotal + shipping;
+    }
+    %>
+
+    <div class="cart-with-items" id="cart-with-items" style="<%= cartItems.length === 0 ? 'display:none;' : '' %>">
+      <div class="cart-items">
+        <% if (cartItems && cartItems.length > 0) { %>
+          <% cartItems.forEach(item => { %>
+            <div class="cart-item" data-item-id="<%= item.id %>">
+              <div class="item-image">
+                <% if (item.image_url) { %>
+                  <img src="<%= item.image_url %>" alt="<%= item.product_name %>">
+                <% } else { %>
+                  <div class="image-placeholder">
+                    <i class="fa-solid fa-image"></i>
+                  </div>
+                <% } %>
+              </div>
+              
+              <div class="item-details">
+                <h3 class="item-name"><%= item.product_name %></h3>
+                <% if (item.size || item.color) { %>
+                  <p class="item-options">
+                    <% if (item.size) { %>Talla: <%= item.size %><% } %>
+                    <% if (item.size && item.color) { %>, <% } %>
+                    <% if (item.color) { %>Color: <%= item.color %><% } %>
+                  </p>
+                <% } %>
+                <p class="item-price">
+                  Q<%= parseFloat(item.price).toFixed(2) %>
+                  <small class="usd-conversion">
+                    ≈ $<%= (parseFloat(item.price) * 0.128).toFixed(2) %> USD
+                  </small>
+                </p>
+              </div>
+              
+              <div class="item-quantity">
+                <button class="qty-btn" data-action="decrease">−</button>
+                <input type="number" class="qty-input" value="<%= item.quantity %>" min="1" max="15">
+                <button class="qty-btn" data-action="increase">+</button>
+              </div>
+              
+              <div class="item-total">
+                <span class="total-price">
+                  Q<%= (parseFloat(item.price) * item.quantity).toFixed(2) %>
+                  <small class="usd-conversion">
+                    ≈ $<%= ((parseFloat(item.price) * item.quantity) * 0.128).toFixed(2) %> USD
+                  </small>
+                </span>
+                <button class="remove-item" title="Eliminar producto">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+          <% }); %>
+        <% } %>
+      </div>
+
+      <div class="order-summary">
+        <h3>Resumen del Pedido</h3>
+        
+        <div class="summary-row">
+          <span>Subtotal:</span>
+          <span id="subtotal">
+            Q<%= subtotal.toFixed(2) %>
+            <small class="usd-conversion">
+              ≈ $<%= (subtotal * 0.128).toFixed(2) %> USD
+            </small>
+          </span>
+        </div>
+
+        <div class="summary-row">
+          <span>Envío:</span>
+          <span id="shipping">
+            <% if (subtotal > 0) { %>
+              Q25.00
+              <small class="usd-conversion">≈ $3.20 USD</small>
+            <% } else { %>
+              Gratis
+            <% } %>
+          </span>
+        </div>
+
+        <div class="summary-row total-row">
+          <span>Total:</span>
+          <span id="total">
+            Q<%= total.toFixed(2) %>
+            <small class="usd-conversion">
+              ≈ $<%= (total * 0.128).toFixed(2) %> USD
+            </small>
+          </span>
+        </div>
+
+        <button class="btn-checkout" id="checkout-btn">
+          <i class="fa-brands fa-whatsapp"></i>
+          Finalizar Pedido por WhatsApp
+        </button>
+
+        <div class="payment-info">
+          <h4>Métodos de Pago</h4>
+          <p><i class="fa-solid fa-money-bill"></i> Efectivo contra entrega</p>
+          <p><i class="fa-solid fa-building-columns"></i> Transferencia bancaria</p>
+          <p><i class="fa-solid fa-credit-card"></i> Tarjeta (en persona)</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-cart" id="empty-cart" style="<%= cartItems.length > 0 ? 'display:none;' : '' %>">
+      <div class="empty-cart-icon">
+        <i class="fa-solid fa-cart-shopping"></i>
+      </div>
+      <h2>Tu carrito está vacío</h2>
+      <p>Agrega algunos productos increíbles a tu carrito</p>
+      <a href="/catalog" class="btn btn-primary">Explorar Productos</a>
+    </div>
+  </div>
+</main>

@@ -1,0 +1,20 @@
+<!-- views/pages/505.ejs -->
+<main class="error-container">
+  <h1 class="error-code">500</h1>
+  <h2 class="error-title">Error del Servidor</h2>
+  <p class="error-description">
+    Algo salió mal en nuestro servidor. Estamos trabajando para solucionarlo.
+  </p>
+  <div class="error-actions">
+    <a href="/" class="btn-error btn-primary-error">
+      ← Volver al Inicio
+    </a>
+  </div>
+  
+  <% if (error && error.stack) { %>
+  <div class="error-details">
+    <h3>Detalles del error (modo desarrollo):</h3>
+    <pre><%= error.stack %></pre>
+  </div>
+  <% } %>
+</main>

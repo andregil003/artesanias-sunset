@@ -1,0 +1,211 @@
+/* public/css/footer.css */
+
+/* ========================================
+   FOOTER - NORMAL (AL FINAL DEL CONTENIDO)
+   ======================================== */
+
+#main-footer {
+    width: 100%;
+    background-color: var(--text-color);
+    color: var(--background-color);
+    padding: var(--spacing-xl) 0 var(--spacing-md);
+    margin-top: var(--spacing-xxl);
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ========================================
+   CONTENIDO
+   ======================================== */
+
+.footer-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    padding: 0 var(--spacing-md);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-section {
+    text-align: center;
+}
+
+.footer-section h3 {
+    color: var(--primary-color);
+    font-size: var(--font-md);
+    margin-bottom: var(--spacing-sm);
+    font-weight: 700;
+}
+
+.footer-section p {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    margin: var(--spacing-sm) 0;
+    font-size: var(--font-sm);
+    color: var(--background-color);
+}
+
+/* ========================================
+   ÍCONOS (Font Awesome)
+   ======================================== */
+
+.footer-icon {
+    font-size: 14px;
+    color: var(--background-color);
+    min-width: 16px;
+    text-align: center;
+}
+
+.footer-icon-small {
+    font-size: 12px; /* ✅ CORREGIDO: solo font-size */
+    color: var(--background-color);
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.footer-icon-small.heart {
+    color: var(--c2); /* ✅ CORREGIDO: color en lugar de stroke y fill */
+    animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    10% { transform: scale(1.15); }
+    20% { transform: scale(1); }
+}
+
+/* ========================================
+   ENLACES
+   ======================================== */
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin: var(--spacing-sm) 0;
+}
+
+.footer-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    color: var(--background-color);
+    text-decoration: none;
+    font-size: var(--font-sm);
+    transition: color var(--transition-fast);
+}
+
+.footer-links a:hover {
+    color: var(--primary-color);
+}
+
+/* ========================================
+   BOTÓN WHATSAPP
+   ======================================== */
+
+.whatsapp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    background-color: var(--secondary-color);
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--border-radius-md);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: var(--font-sm);
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+}
+
+.whatsapp-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.whatsapp-btn .btn-icon {
+    font-size: 18px;
+    color: white;
+}
+
+/* ========================================
+   COPYRIGHT
+   ======================================== */
+
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    margin-top: var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-md) 0;
+    text-align: center;
+}
+
+.footer-bottom p {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-xs);
+    color: var(--background-color);
+    margin: 0;
+    flex-wrap: wrap;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (min-width: 768px) {
+    .footer-content {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 0 var(--spacing-xl);
+    }
+    
+    .footer-section {
+        text-align: left;
+    }
+    
+    .footer-section p {
+        justify-content: flex-start;
+    }
+    
+    .footer-section h3 {
+        font-size: var(--font-lg);
+    }
+    
+    .footer-section p,
+    .footer-links a {
+        font-size: var(--font-md);
+    }
+    
+    .footer-icon {
+        font-size: 16px;
+    }
+    
+    .whatsapp-btn {
+        font-size: var(--font-md);
+        padding: var(--spacing-md) var(--spacing-xl);
+    }
+    
+    .whatsapp-btn .btn-icon {
+        font-size: 20px;
+    }
+    
+    .footer-bottom p {
+        font-size: var(--font-sm);
+    }
+}
+
+@media (min-width: 1024px) {
+    #main-footer {
+        padding: var(--spacing-xxl) 0 var(--spacing-lg);
+    }
+}

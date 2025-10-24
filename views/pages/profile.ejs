@@ -1,0 +1,234 @@
+<!-- views/pages/profile.ejs -->
+<div class="container">
+    <div class="profile-container">
+        <h1>Mi Perfil</h1>
+        
+        <% if (typeof success !== 'undefined' && success) { %>
+            <div class="alert alert-success">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <span><%= decodeURIComponent(success) %></span>
+            </div>
+        <% } %>
+        
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-error">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+                <span><%= decodeURIComponent(error) %></span>
+            </div>
+        <% } %>
+        
+        <div class="profile-grid">
+            <!-- Panel de información -->
+            <div class="profile-card">
+                <h2>Información Personal</h2>
+                <form action="/auth/profile/update" method="POST">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="first_name">
+                                <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                </svg>
+                                Nombre
+                            </label>
+                            <input 
+                                type="text" 
+                                id="first_name" 
+                                name="first_name" 
+                                class="form-control" 
+                                value="<%= user.first_name %>"
+                                required
+                            >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="last_name">
+                                <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                </svg>
+                                Apellido
+                            </label>
+                            <input 
+                                type="text" 
+                                id="last_name" 
+                                name="last_name" 
+                                class="form-control" 
+                                value="<%= user.last_name %>"
+                                required
+                            >
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">
+                            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                            </svg>
+                            Email
+                        </label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            class="form-control" 
+                            value="<%= user.email %>"
+                            disabled
+                        >
+                        <small>El email no se puede cambiar</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">
+                            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                            </svg>
+                            Teléfono
+                        </label>
+                        <input 
+                            type="tel" 
+                            id="phone" 
+                            name="phone" 
+                            class="form-control" 
+                            value="<%= user.phone || '' %>"
+                        >
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">
+                        Guardar Cambios
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Panel de estadísticas -->
+            <div class="profile-card">
+                <h2>Estadísticas</h2>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                        </svg>
+                        <div class="stat-value"><%= stats.total_orders %></div>
+                        <div class="stat-label">Órdenes</div>
+                    </div>
+                    
+                    <div class="stat-box">
+                        <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+                        </svg>
+                        <div class="stat-value">Q<%= parseFloat(stats.total_spent).toFixed(2) %></div>
+                        <div class="stat-label">Total Gastado</div>
+                    </div>
+                </div>
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Miembro desde:</span>
+                        <span class="info-value"><%= new Date(user.created_at).toLocaleDateString('es-GT') %></span>
+                    </div>
+                    <% if (user.city_name) { %>
+                    <div class="info-item">
+                        <span class="info-label">Ubicación:</span>
+                        <span class="info-value"><%= user.city_name %>, <%= user.country_name %></span>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+            
+            <!-- Panel de cambiar contraseña -->
+            <div class="profile-card">
+                <h2>Cambiar Contraseña</h2>
+                <form action="/auth/profile/change-password" method="POST">
+                    <div class="form-group">
+                        <label for="current_password">
+                            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Contraseña Actual
+                        </label>
+                        <input 
+                            type="password" 
+                            id="current_password" 
+                            name="current_password" 
+                            class="form-control" 
+                            placeholder="••••••••"
+                            required
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new_password">
+                            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Nueva Contraseña
+                        </label>
+                        <input 
+                            type="password" 
+                            id="new_password" 
+                            name="new_password" 
+                            class="form-control" 
+                            placeholder="Mínimo 8 caracteres"
+                            required
+                            minlength="8"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new_password_confirm">
+                            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Confirmar Nueva Contraseña
+                        </label>
+                        <input 
+                            type="password" 
+                            id="new_password_confirm" 
+                            name="new_password_confirm" 
+                            class="form-control" 
+                            placeholder="Repite la nueva contraseña"
+                            required
+                            minlength="8"
+                        >
+                    </div>
+                    
+                    <button type="submit" class="btn btn-secondary btn-block">
+                        Cambiar Contraseña
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Panel de órdenes recientes -->
+            <div class="profile-card">
+                <h2>Órdenes Recientes</h2>
+                <% if (recentOrders.length > 0) { %>
+                    <div class="orders-list">
+                        <% recentOrders.forEach(order => { %>
+                            <div class="order-item">
+                                <div class="order-header">
+                                    <span class="order-id">#<%= order.order_id %></span>
+                                    <span class="order-status status-<%= order.status.toLowerCase().replace(' ', '-') %>">
+                                        <%= order.status %>
+                                    </span>
+                                </div>
+                                <div class="order-details">
+                                    <span class="order-date">
+                                        <%= new Date(order.order_date).toLocaleDateString('es-GT') %>
+                                    </span>
+                                    <span class="order-total">
+                                        <%= order.currency_code %> <%= parseFloat(order.total).toFixed(2) %>
+                                    </span>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <p class="empty-state">No tienes órdenes todavía</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>

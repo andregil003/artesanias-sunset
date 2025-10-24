@@ -1,0 +1,117 @@
+<!-- public/views/pages/home.ejs -->
+<main id="main-content">
+  <div class="container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <h1>Artesanías Sunset</h1>
+      <p>Descubre la belleza de las artesanías guatemaltecas</p>
+      <a href="/catalog" class="btn btn-primary">Explorar Catálogo</a>
+    </section>
+
+    <!-- Categorías -->
+    <section class="categories-section">
+      <h2 class="section-title">Explora por Categoría</h2>
+      
+      <div class="products-grid">
+        <div class="category-card">
+          <div class="category-icon">💎</div>
+          <h3>Joyería</h3>
+          <p>Collares y accesorios únicos de jade y plata</p>
+          <a href="/category/joyeria" class="btn btn-secondary">Ver Productos</a>
+        </div>
+        
+        <div class="category-card">
+          <div class="category-icon">🏺</div>
+          <h3>Cerámica</h3>
+          <p>Jarrones y decoraciones artesanales</p>
+          <a href="/category/ceramica" class="btn btn-secondary">Ver Productos</a>
+        </div>
+        
+        <div class="category-card">
+          <div class="category-icon">🧵</div>
+          <h3>Textiles</h3>
+          <p>Productos textiles tradicionales guatemaltecos</p>
+          <a href="/category/textiles" class="btn btn-secondary">Ver Productos</a>
+        </div>
+        
+        <div class="category-card">
+          <div class="category-icon">👗</div>
+          <h3>Huipiles</h3>
+          <p>Blusas bordadas tradicionales</p>
+          <a href="/category/huipiles" class="btn btn-secondary">Ver Productos</a>
+        </div>
+        
+        <div class="category-card">
+          <div class="category-icon">🎭</div>
+          <h3>Máscaras</h3>
+          <p>Máscaras decorativas talladas a mano</p>
+          <a href="/category/mascaras" class="btn btn-secondary">Ver Productos</a>
+        </div>
+        
+        <div class="category-card">
+          <div class="category-icon">🪵</div>
+          <h3>Madera Tallada</h3>
+          <p>Esculturas y figuras de madera</p>
+          <a href="/category/madera-tallada" class="btn btn-secondary">Ver Productos</a>
+        </div>
+        
+        <div class="category-card">
+          <div class="category-icon">🏠</div>
+          <h3>Decoración del Hogar</h3>
+          <p>Artículos decorativos para tu hogar</p>
+          <a href="/category/decoracion-hogar" class="btn btn-secondary">Ver Productos</a>
+        </div>
+        
+        <div class="category-card">
+          <div class="category-icon">👜</div>
+          <h3>Bolsas y Accesorios</h3>
+          <p>Bolsas artesanales y complementos</p>
+          <a href="/category/bolsas-accesorios" class="btn btn-secondary">Ver Productos</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Productos Destacados -->
+    <section class="featured-section">
+      <h2 class="section-title">Productos Destacados</h2>
+      
+      <% if (featuredProducts && featuredProducts.length > 0) { %>
+        <div class="products-grid">
+          <% featuredProducts.forEach(product => { %>
+            <div class="product-card">
+              <div class="product-image">
+                <% if (product.image_url) { %>
+                  <img src="<%= product.image_url %>" alt="<%= product.product_name %>">
+                <% } else { %>
+                  <div class="image-placeholder">📷</div>
+                <% } %>
+              </div>
+              <div class="product-info">
+                <h3><%= product.product_name %></h3>
+                <p class="product-description"><%= product.description.substring(0, 100) %>...</p>
+                <p class="product-price">Q<%= parseFloat(product.price).toFixed(2) %></p>
+                <div class="product-actions">
+                  <a href="/product/<%= product.product_id %>" class="btn btn-primary">Ver Detalles</a>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <div class="product-card text-center">
+          <h3>Próximamente nuevos productos</h3>
+          <p>Estamos preparando artesanías especiales para ti</p>
+        </div>
+      <% } %>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <h2>¿Tienes dudas sobre nuestros productos?</h2>
+      <p>Contáctanos directamente por WhatsApp</p>
+      <a href="https://wa.me/<%= process.env.WHATSAPP_NUMBER || '50241298574' %>" class="btn btn-primary" target="_blank">
+        Chatear Ahora
+      </a>
+    </section>
+  </div>
+</main>

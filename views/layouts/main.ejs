@@ -1,0 +1,37 @@
+<!-- views/layouts/main.ejs -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'Artesanías Sunset' %></title>
+  
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  
+  <% if (typeof pageCSS !== 'undefined') { %>
+    <link rel="stylesheet" href="<%= pageCSS %>">
+  <% } %>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  </head>
+<body>
+  <%- include('../partials/header') %>
+  
+  <%- body %>
+  
+  <%- include('../partials/footer') %>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+  
+  <script src="/js/header.js"></script>
+  
+  <% if (typeof pageJS !== 'undefined') { %>
+    <% pageJS.forEach(js => { %>
+      <script src="<%= js %>"></script>
+    <% }); %>
+  <% } %>
+</body>
+</html>

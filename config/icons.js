@@ -1,0 +1,25 @@
+// config/icons.js
+export const icons = {
+  user: 'fa-solid fa-user',
+  cart: 'fa-solid fa-cart-shopping',
+  search: 'fa-solid fa-magnifying-glass',
+  close: 'fa-solid fa-xmark',
+  userCircle: 'fa-solid fa-circle-user',
+  admin: 'fa-solid fa-shield-halved',
+  analytics: 'fa-solid fa-chart-line',
+  profile: 'fa-solid fa-user',
+  login: 'fa-solid fa-right-to-bracket',
+  register: 'fa-solid fa-user-plus',
+  home: 'fa-solid fa-house',
+  catalog: 'fa-solid fa-table-cells',
+  blog: 'fa-solid fa-book-open',
+  contact: 'fa-solid fa-envelope',
+  logout: 'fa-solid fa-right-from-bracket',
+  phone: 'fa-solid fa-phone',
+  location: 'fa-solid fa-location-dot',
+  catalogBag: 'fa-solid fa-bag-shopping', 
+  contactMessage: 'fa-solid fa-message',
+  whatsapp: 'fa-brands fa-whatsapp',
+  copyright: 'fa-regular fa-copyright',
+  heart: 'fa-solid fa-heart'
+};

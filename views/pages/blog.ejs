@@ -1,0 +1,61 @@
+<!-- views/pages/blog.ejs -->
+<main id="main-content">
+    <div class="container">
+        <!-- Header del blog -->
+        <section class="blog-header section text-center">
+            <h1>Nuestro Blog</h1>
+            <p>Historias, técnicas y tradiciones de nuestras artesanías guatemaltecas</p>
+        </section>
+
+        <!-- Grid de artículos -->
+        <section class="blog-grid section">
+            <div class="articles-grid">
+                <% if (articles && articles.length > 0) { %>
+                    <% articles.forEach(article => { %>
+                        <article class="article-card">
+                            <div class="article-image">
+                                <% if (article.image) { %>
+                                    <img src="<%= article.image %>" alt="<%= article.title %>">
+                                <% } else { %>
+                                    <div class="image-placeholder">📰</div>
+                                <% } %>
+                            </div>
+
+                            <div class="article-content">
+                                <div class="article-meta">
+                                    <span class="article-date">
+                                        <%= new Date(article.date).toLocaleDateString('es-GT', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        }) %>
+                                    </span>
+                                </div>
+
+                                <h2 class="article-title">
+                                    <a href="/blog/<%= article.id %>"><%= article.title %></a>
+                                </h2>
+
+                                <p class="article-excerpt"><%= article.excerpt %></p>
+
+                                <a href="/blog/<%= article.id %>" class="btn btn-secondary">Leer más</a>
+                            </div>
+                        </article>
+                    <% }); %>
+                <% } else { %>
+                    <div class="no-articles">
+                        <h3>Próximamente</h3>
+                        <p>Estamos preparando contenido interesante sobre nuestras artesanías</p>
+                    </div>
+                <% } %>
+            </div>
+        </section>
+
+        <!-- Llamada a la acción -->
+        <section class="blog-cta section text-center">
+            <h2>¿Te interesa conocer más sobre nuestras artesanías?</h2>
+            <p>Visita nuestro catálogo y descubre piezas únicas hechas con las técnicas tradicionales que compartimos en nuestro blog</p>
+            <a href="/catalog" class="btn btn-primary">Ver Catálogo</a>
+        </section>
+    </div>
+</main>

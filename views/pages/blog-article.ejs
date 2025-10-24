@@ -1,0 +1,145 @@
+<style>
+    #main-content {
+        padding-top: 140px;
+    }
+    
+    .breadcrumb {
+        padding: 20px 0;
+        font-size: 14px;
+        color: var(--c3);
+    }
+
+    .breadcrumb a {
+        color: var(--c1);
+        text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumb span {
+        color: var(--c5);
+        font-weight: 600;
+    }
+    
+    .blog-article {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin-bottom: 40px;
+    }
+
+    .article-header {
+        padding: 40px;
+        background: var(--c4);
+    }
+
+    .article-meta {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .article-date {
+        color: var(--c3);
+        font-size: 14px;
+    }
+
+    .article-title {
+        font-size: 2.5em;
+        color: var(--c5);
+        margin-bottom: 30px;
+        line-height: 1.2;
+    }
+
+    .article-header .article-image {
+        height: 300px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4em;
+        color: var(--c3);
+    }
+
+    .article-content {
+        padding: 40px;
+        line-height: 1.8;
+        font-size: 1.1em;
+        color: #333;
+    }
+
+    .article-content p {
+        margin-bottom: 20px;
+    }
+
+    .article-navigation {
+        padding: 30px 40px;
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        border-top: 1px solid #eee;
+    }
+
+    @media (max-width: 768px) {
+        .article-header,
+        .article-content,
+        .article-navigation {
+            padding: 20px;
+        }
+        
+        .article-title {
+            font-size: 2em;
+        }
+        
+        .article-navigation {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<main id="main-content">
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="/">Inicio</a> > 
+            <a href="/blog">Blog</a> > 
+            <span><%= article.title %></span>
+        </nav>
+
+        <article class="blog-article">
+            <header class="article-header">
+                <div class="article-meta">
+                    <time class="article-date">
+                        <%= new Date(article.date).toLocaleDateString('es-GT', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        }) %>
+                    </time>
+                </div>
+                
+                <h1 class="article-title"><%= article.title %></h1>
+                
+                <div class="article-image">
+                    <div class="image-placeholder">📰</div>
+                </div>
+            </header>
+
+            <div class="article-content">
+                <% article.content.split('\n\n').forEach(paragraph => { %>
+                    <% if (paragraph.trim()) { %>
+                        <p><%= paragraph.trim() %></p>
+                    <% } %>
+                <% }); %>
+            </div>
+
+            <nav class="article-navigation">
+                <a href="/blog" class="btn btn-secondary">← Volver al Blog</a>
+                <a href="/catalog" class="btn btn-primary">Ver Productos Relacionados</a>
+            </nav>
+        </article>
+    </div>
+</main>

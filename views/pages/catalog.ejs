@@ -1,0 +1,243 @@
+<!-- views/pages/catalog.ejs -->
+<main id="main-content">
+  <div class="container">
+    <section class="catalog-header section">
+      <h1 class="text-center">Catálogo de Productos</h1>
+      <p class="text-center">Descubre nuestras auténticas artesanías guatemaltecas</p>
+    </section>
+
+    <section class="catalog-controls section">
+      <div class="controls-row">
+        <button class="filter-trigger-btn" id="filter-trigger">
+          <i class="fa-solid fa-sliders"></i> Filtros
+          <% 
+          let activeFilters = 0;
+          if (filters?.selectedCategories?.length > 0) activeFilters++;
+          if (filters && (filters.minPrice > 0 || filters.maxPrice)) activeFilters++;
+          if (activeFilters > 0) { %>
+            <span class="active-filters-count"><%= activeFilters %></span>
+          <% } %>
+        </button>
+        
+        <form method="GET" action="/catalog" id="sort-form" style="display: inline; width: 100%;">
+          <% if (filters?.selectedCategories) {
+            filters.selectedCategories.forEach(cat => { %>
+              <input type="hidden" name="category" value="<%= cat %>">
+            <% });
+          }
+          if (filters?.minPrice > 0) { %>
+            <input type="hidden" name="min_price" value="<%= filters.minPrice %>">
+          <% }
+          if (filters?.maxPrice) { %>
+            <input type="hidden" name="max_price" value="<%= filters.maxPrice %>">
+          <% } %>
+          
+          <select class="sort-select" name="sort" onchange="this.form.submit()">
+            <option value="newest" <%= filters?.sortBy === 'newest' ? 'selected' : '' %>>Más recientes</option>
+            <option value="oldest" <%= filters?.sortBy === 'oldest' ? 'selected' : '' %>>Más antiguos</option>
+            <option value="price-asc" <%= filters?.sortBy === 'price-asc' ? 'selected' : '' %>>Precio: menor a mayor</option>
+            <option value="price-desc" <%= filters?.sortBy === 'price-desc' ? 'selected' : '' %>>Precio: mayor a menor</option>
+            <option value="name" <%= filters?.sortBy === 'name' ? 'selected' : '' %>>A-Z</option>
+            <option value="name-desc" <%= filters?.sortBy === 'name-desc' ? 'selected' : '' %>>Z-A</option>
+          </select>
+        </form>
+      </div>
+      
+      <div class="results-info">
+        <% if (pagination.showAll) { %>
+          Mostrando todos los <%= pagination.totalProducts %> productos
+        <% } else { %>
+          Mostrando <%= products.length %> de <%= pagination.totalProducts %> productos
+          (Página <%= pagination.currentPage %> de <%= pagination.totalPages %>)
+        <% } %>
+      </div>
+    </section>
+
+    <div class="filter-modal-overlay" id="filter-modal-overlay">
+      <div class="filter-modal" id="filter-modal">
+        <div class="filter-header">
+          <h3>Filtros</h3>
+          <button class="filter-close" id="filter-close">×</button>
+        </div>
+        
+        <form method="GET" action="/catalog" id="filter-form">
+          <div class="filter-content">
+            <div class="filter-section">
+              <h4>Categorías</h4>
+              <div class="filter-options">
+                <% if (categories?.length > 0) {
+                  categories.forEach(cat => { %>
+                    <label class="filter-option">
+                      <input type="checkbox" 
+                             name="category" 
+                             value="<%= cat.category_name %>"
+                             <%= filters?.selectedCategories?.includes(cat.category_name) ? 'checked' : '' %>>
+                      <span><%= cat.category_name %></span>
+                    </label>
+                  <% });
+                } %>
+              </div>
+            </div>
+
+            <div class="filter-section">
+              <h4>Rango de Precio</h4>
+              <% 
+              const currentMin = (filters?.minPrice > 0) ? filters.minPrice : 0;
+              const currentMax = filters?.maxPrice || 3000;
+              %>
+              <div class="price-slider-container">
+                <div class="price-display">
+                  <span>Q<span id="min-price-display"><%= currentMin %></span></span>
+                  <span>-</span>
+                  <span>Q<span id="max-price-display"><%= currentMax %></span></span>
+                </div>
+                
+                <div class="slider-track">
+                  <div class="slider-range" id="slider-range"></div>
+                </div>
+                
+                <div class="slider-inputs">
+                  <input type="range" id="min-price-slider" name="min_price" 
+                         min="0" max="3000" step="50" value="<%= currentMin %>">
+                  <input type="range" id="max-price-slider" name="max_price" 
+                         min="0" max="3000" step="50" value="<%= currentMax %>">
+                </div>
+              </div>
+            </div>
+            
+            <input type="hidden" name="sort" value="<%= filters?.sortBy || 'newest' %>">
+          </div>
+
+          <div class="filter-footer">
+            <a href="/catalog" class="btn-clear-filters">Limpiar Filtros</a>
+            <button type="submit" class="btn-apply-filters">Aplicar Filtros</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <section class="products-section section">
+      <div class="products-grid" id="products-grid">
+        <% if (products?.length > 0) {
+          products.forEach(product => { %>
+            <div class="product-card">
+              <div class="product-image">
+                <% if (product.image_url) { %>
+                  <img src="<%= product.image_url %>" alt="<%= product.product_name %>">
+                <% } else { %>
+                  <div class="image-placeholder"><i class="fa-solid fa-image"></i></div>
+                <% }
+                if (product.available_stock === 0) { %>
+                  <div class="out-of-stock-badge">Agotado</div>
+                <% } %>
+              </div>
+              <div class="product-info">
+                <p class="product-category"><%= product.category_name %></p>
+                <h3><%= product.product_name %></h3>
+                <p class="product-description"><%= product.description ? product.description.substring(0, 100) + '...' : 'Sin descripción' %></p>
+                <p class="product-price">Q<%= parseFloat(product.price).toFixed(2) %></p>
+                <p class="product-stock">
+                  <% if (product.available_stock > 10) { %>
+                    <i class="fa-solid fa-circle-check"></i> Disponible
+                  <% } else if (product.available_stock > 0) { %>
+                    <i class="fa-solid fa-triangle-exclamation"></i> Últimas <%= product.available_stock %> unidades
+                  <% } else { %>
+                    <i class="fa-solid fa-circle-xmark"></i> Agotado
+                  <% } %>
+                </p>
+                <div class="product-actions">
+                  <a href="/product/<%= product.product_id %>" class="btn btn-primary">Ver Detalles</a>
+                  <% if (product.available_stock > 0) { %>
+                    <button class="btn add-to-cart" data-id="<%= product.product_id %>">Agregar</button>
+                  <% } else { %>
+                    <button class="btn btn-disabled" disabled>Agotado</button>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          <% });
+        } else { %>
+          <div class="no-products">
+            <h3>No hay productos con estos filtros</h3>
+            <p>Intenta ajustar los filtros o <a href="/catalog">ver todos los productos</a></p>
+          </div>
+        <% } %>
+      </div>
+    </section>
+
+    <%
+    let buildUrl = (page) => {
+      let url = `/catalog?page=${page}`;
+      if (filters.sortBy) url += `&sort=${filters.sortBy}`;
+      if (filters.minPrice > 0) url += `&min_price=${filters.minPrice}`;
+      if (filters.maxPrice) url += `&max_price=${filters.maxPrice}`;
+      if (filters.selectedCategories) {
+        filters.selectedCategories.forEach(cat => url += `&category=${encodeURIComponent(cat)}`);
+      }
+      return url;
+    };
+    %>
+
+    <% if (!pagination.showAll && pagination.totalPages > 1 && products.length > 0) { %>
+    <div class="pagination-controls">
+      <% if (pagination.hasPrev) { %>
+        <a href="<%= buildUrl(pagination.currentPage - 1) %>" class="pagination-btn">←</a>
+      <% } %>
+      
+      <div class="pagination-numbers">
+        <% 
+        const maxVisible = 5;
+        let startPage = Math.max(1, pagination.currentPage - 2);
+        let endPage = Math.min(pagination.totalPages, startPage + maxVisible - 1);
+        
+        if (endPage - startPage < maxVisible - 1) {
+          startPage = Math.max(1, endPage - maxVisible + 1);
+        }
+        
+        if (startPage > 1) { %>
+          <a href="<%= buildUrl(1) %>" class="pagination-number">1</a>
+          <% if (startPage > 2) { %>
+            <span class="pagination-dots">...</span>
+          <% }
+        }
+        
+        for (let i = startPage; i <= endPage; i++) { %>
+          <a href="<%= buildUrl(i) %>" 
+             class="pagination-number <%= i === pagination.currentPage ? 'active' : '' %>">
+            <%= i %>
+          </a>
+        <% }
+        
+        if (endPage < pagination.totalPages) {
+          if (endPage < pagination.totalPages - 1) { %>
+            <span class="pagination-dots">...</span>
+          <% } %>
+          <a href="<%= buildUrl(pagination.totalPages) %>" class="pagination-number">
+            <%= pagination.totalPages %>
+          </a>
+        <% } %>
+      </div>
+      
+      <% if (pagination.hasNext) { %>
+        <a href="<%= buildUrl(pagination.currentPage + 1) %>" class="pagination-btn">→</a>
+      <% } %>
+    </div>
+
+    <div class="view-all-section">
+      <a href="<%= buildUrl(1).replace('page=1', 'all=true') %>" class="btn-view-all">Ver todos</a>
+    </div>
+    <% } else if (pagination.showAll) { %>
+    <div class="view-all-section">
+      <a href="/catalog" class="btn-view-all">← Volver a paginación</a>
+    </div>
+    <% } %>
+
+    <section class="catalog-info section text-center">
+      <h2>¿No encuentras lo que buscas?</h2>
+      <p>Contáctanos por WhatsApp para consultar sobre productos personalizados</p>
+      <a href="https://wa.me/<%= process.env.WHATSAPP_NUMBER || '50241298574' %>" class="btn btn-primary" target="_blank">
+        Consultar por WhatsApp
+      </a>
+    </section>
+  </div>
+</main>
