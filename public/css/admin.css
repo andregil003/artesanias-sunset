@@ -567,3 +567,10 @@
         grid-template-columns: 2.5fr 1.5fr 1fr 1fr 1.5fr auto auto;
     }
 }
+
+.admin-toast.toast-success .toast-icon {
+  color: var(--success-color, #27ae60);
+}
+.admin-toast.toast-error .toast-icon {
+  color: var(--error-color, #e74c3c);
+}

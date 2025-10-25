@@ -6,15 +6,25 @@ $(document).ready(function() {
     const $overlay = $('#admin-sidebar-overlay');
     const $closeBtn = $('#sidebar-close-btn');
 
+    // FIX: Store the element that opened the sidebar
+    let $lastFocusedElement = null;
+
     // --- Sidebar Toggle Logic ---
     function openSidebar() {
+        // FIX: Store the focused element
+        $lastFocusedElement = $(document.activeElement);
         $body.addClass('sidebar-visible');
-        // Opcional: enfocar el botón de cerrar para accesibilidad
-        // $closeBtn.trigger('focus'); 
+        // FIX: Move focus into the sidebar
+        $closeBtn.trigger('focus'); 
     }
 
     function closeSidebar() {
         $body.removeClass('sidebar-visible');
+        // FIX: Return focus to the opening element
+        if ($lastFocusedElement) {
+            $lastFocusedElement.trigger('focus');
+            $lastFocusedElement = null;
+        }
     }
 
     $hamburgerBtn.on('click', openSidebar);
@@ -27,24 +37,17 @@ $(document).ready(function() {
         }
     });
 
-    // Opcional: Cerrar sidebar al hacer clic en un enlace de navegación
     $sidebar.find('.nav-item').on('click', function(e) {
-        // No cerrar si es un enlace externo, ancla, o ya estamos en esa página
         const href = $(this).attr('href');
         const currentPath = window.location.pathname;
         
-        // Evita cerrar si el link es la página actual o un #
         if (!href || href === '#' || href === currentPath || href.startsWith('http')) {
            return; 
         }
 
-        // Si es una navegación normal dentro del admin, cierra el menú
-        // Agregamos un pequeño delay para que se vea el click
         setTimeout(closeSidebar, 150); 
     });
-
     // --- Fin Sidebar Toggle Logic ---
-
 });
 
 /**
@@ -53,13 +56,13 @@ $(document).ready(function() {
  * @param {string} [type='success'] - 'success' o 'error'.
  */
 function showToast(message, type = 'success') {
-    $('.admin-toast').remove(); // Elimina toasts anteriores
+    $('.admin-toast').remove(); 
     
     const toastClass = type === 'success' ? 'toast-success' : 'toast-error';
-    // Usar iconos FontAwesome en lugar de Emojis
+    
     const iconHtml = type === 'success' 
-        ? '<i class="toast-icon fa-solid fa-check-circle" style="color: #27ae60;"></i>' 
-        : '<i class="toast-icon fa-solid fa-times-circle" style="color: #e74c3c;"></i>';
+        ? '<i class="toast-icon fa-solid fa-check-circle"></i>' 
+        : '<i class="toast-icon fa-solid fa-times-circle"></i>';
     
     const $toast = $(`
         <div class="admin-toast ${toastClass}">
@@ -70,20 +73,14 @@ function showToast(message, type = 'success') {
     
     $('body').append($toast);
     
-    // Forzar reflow para asegurar que la animación se aplique
-    $toast.width(); 
-
-    // Añadir clase 'show' para animar la entrada
     setTimeout(() => {
         $toast.addClass('show');
-    }, 10); // Un pequeño delay puede ayudar
+    }, 10); 
 
-    // Ocultar y eliminar el toast después de 3 segundos
     setTimeout(() => {
         $toast.removeClass('show');
-        // Esperar que termine la animación de salida antes de remover
         setTimeout(() => {
             $toast.remove();
-        }, 300); // Duración de la transición de salida
+        }, 300); 
     }, 3000);
 }

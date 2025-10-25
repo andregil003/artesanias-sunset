@@ -29,36 +29,36 @@ $(document).ready(function() {
         $(this).addClass('selected');
     });
     
+    // FIX: Pass $(this) to the update function instead of just the ID
     $(document).on('click', '.qty-btn', function() {
         const action = $(this).data('action');
         const input = $(this).siblings('.qty-input');
-        const cartItemId = $(this).closest('.cart-item').data('item-id');
         let currentValue = parseInt(input.val());
         
         if (action === 'increase' && currentValue < 15) {
             input.val(currentValue + 1);
-            updateCartItemQuantity(cartItemId, currentValue + 1);
+            updateCartItemQuantity($(this), currentValue + 1);
         } else if (action === 'decrease' && currentValue > 1) {
             input.val(currentValue - 1);
-            updateCartItemQuantity(cartItemId, currentValue - 1);
+            updateCartItemQuantity($(this), currentValue - 1);
         }
     });
     
+    // FIX: Pass $(this) to the update function
     $(document).on('change', '.qty-input', function() {
-        const cartItemId = $(this).closest('.cart-item').data('item-id');
         let newQuantity = parseInt($(this).val());
         
         if (isNaN(newQuantity) || newQuantity < 1) newQuantity = 1;
         else if (newQuantity > 15) newQuantity = 15;
         
         $(this).val(newQuantity);
-        updateCartItemQuantity(cartItemId, newQuantity);
+        updateCartItemQuantity($(this), newQuantity);
     });
     
+    // FIX: Pass $(this) to the remove function
     $(document).on('click', '.remove-item', function() {
         if (confirm('¿Eliminar este producto?')) {
-            const cartItemId = $(this).closest('.cart-item').data('item-id');
-            removeFromCart(cartItemId);
+            removeFromCart($(this));
         }
     });
     
@@ -78,7 +78,8 @@ $(document).ready(function() {
             subtotal += price * quantity;
         });
         
-        const shipping = 25.00;
+        // FIX: Use global variable
+        const shipping = window.SHIPPING_COST;
         const total = subtotal + shipping;
         
         let orderDetails = '';
@@ -100,11 +101,12 @@ $(document).ready(function() {
             'Hola, quiero hacer este pedido:%0A%0A' + 
             orderDetails + '%0A' +
             'Subtotal: Q' + subtotal.toFixed(2) + '%0A' +
-            'Envío: Q25.00%0A' +
+            'Envío: Q' + shipping.toFixed(2) + '%0A' +
             'Total: Q' + total.toFixed(2) + '%0A%0A' +
             '¡Gracias!';
         
-        window.open('https://wa.me/50241298574?text=' + message, '_blank');
+        // FIX: Use global variable
+        window.open('https://wa.me/' + window.WHATSAPP_NUMBER + '?text=' + message, '_blank');
     });
 });
 
@@ -137,10 +139,9 @@ function clearLocalCart() {
     }
 }
 
+// FIX: Replaced broken DOM-check with reliable global variable
 function isUserLoggedIn() {
-    const hasProfileLink = $('#user-profile-link').length > 0;
-    const isAuthPage = window.location.pathname.startsWith('/auth/');
-    return isAuthPage ? false : hasProfileLink;
+    return window.IS_USER_LOGGED_IN === true;
 }
 
 // ========================================
@@ -164,6 +165,10 @@ function syncCartOnLoad() {
                 console.log('✅', response.message);
                 clearLocalCart();
                 updateCartCount();
+                // Reload to show the server-rendered cart
+                if (window.location.pathname.includes('/cart')) {
+                    window.location.reload();
+                }
             }
         },
         error: function(xhr) {
@@ -227,8 +232,12 @@ function addToCart(productId, quantity = 1, size = '', color = '', $btn) {
 // ========================================
 // ACTUALIZAR
 // ========================================
-function updateCartItemQuantity(itemId, quantity) {
+// FIX: Refactored function to accept the element, not just an ID
+function updateCartItemQuantity($element, quantity) {
+    const $cartItem = $element.closest('.cart-item');
+
     if (isUserLoggedIn()) {
+        const itemId = $cartItem.data('item-id'); // This is the DB ID
         $.ajax({
             url: `/cart/update/${itemId}`,
             method: 'PUT',
@@ -236,10 +245,10 @@ function updateCartItemQuantity(itemId, quantity) {
             data: JSON.stringify({ quantity }),
             success: function(response) {
                 if (response.success) {
-                    const $cartItem = $(`.cart-item[data-item-id="${itemId}"]`);
                     const price = parseFloat($cartItem.find('.item-price').text().replace('Q', '').trim());
                     const totalPrice = (price * quantity).toFixed(2);
-                    const totalUSD = (totalPrice * 0.128).toFixed(2);
+                    // FIX: Use global variable
+                    const totalUSD = (totalPrice * window.USD_CONVERSION_RATE).toFixed(2);
                     
                     $cartItem.find('.total-price').html(`
                         Q${totalPrice}
@@ -255,17 +264,26 @@ function updateCartItemQuantity(itemId, quantity) {
             }
         });
     } else {
+        // FIX: Use full key (product_id, size, color) for local cart
+        const productId = $cartItem.data('item-id'); // This is product_id
+        const size = $cartItem.data('size');
+        const color = $cartItem.data('color');
         const cart = getLocalCart();
-        const index = cart.findIndex(item => item.product_id == itemId);
+        
+        const index = cart.findIndex(item => 
+            item.product_id == productId && 
+            item.size == size && 
+            item.color == color
+        );
         
         if (index !== -1) {
             cart[index].quantity = quantity;
             saveLocalCart(cart);
             
-            const $cartItem = $(`.cart-item[data-item-id="${itemId}"]`);
             const price = parseFloat($cartItem.find('.item-price').text().replace('Q', '').trim());
             const totalPrice = (price * quantity).toFixed(2);
-            const totalUSD = (totalPrice * 0.128).toFixed(2);
+            // FIX: Use global variable
+            const totalUSD = (totalPrice * window.USD_CONVERSION_RATE).toFixed(2);
             
             $cartItem.find('.total-price').html(`
                 Q${totalPrice}
@@ -281,21 +299,25 @@ function updateCartItemQuantity(itemId, quantity) {
 // ========================================
 // ELIMINAR
 // ========================================
-function removeFromCart(itemId) {
+// FIX: Refactored function to accept the element
+function removeFromCart($element) {
+    const $cartItem = $element.closest('.cart-item');
+
     if (isUserLoggedIn()) {
+        const itemId = $cartItem.data('item-id'); // This is the DB ID
         $.ajax({
             url: `/cart/remove/${itemId}`,
             method: 'DELETE',
             success: function(response) {
                 if (response.success) {
-                    $(`.cart-item[data-item-id="${itemId}"]`).fadeOut(400, function() {
+                    $cartItem.fadeOut(400, function() {
                         $(this).remove();
                         if ($('.cart-item').length === 0) {
                             showEmptyCart();
                         } else {
                             updateOrderSummary();
-                            updateCartCount();
                         }
+                        updateCartCount(); // Update count *after* summary
                     });
                 }
             },
@@ -304,18 +326,25 @@ function removeFromCart(itemId) {
             }
         });
     } else {
+        // FIX: Use full key (product_id, size, color) for local cart
+        const productId = $cartItem.data('item-id'); // This is product_id
+        const size = $cartItem.data('size');
+        const color = $cartItem.data('color');
         const cart = getLocalCart();
-        const newCart = cart.filter(item => item.product_id != itemId);
+        
+        const newCart = cart.filter(item => 
+            !(item.product_id == productId && item.size == size && item.color == color)
+        );
         saveLocalCart(newCart);
         
-        $(`.cart-item[data-item-id="${itemId}"]`).fadeOut(400, function() {
+        $cartItem.fadeOut(400, function() {
             $(this).remove();
             if ($('.cart-item').length === 0) {
                 showEmptyCart();
             } else {
                 updateOrderSummary();
-                updateCartCount();
             }
+            updateCartCount(); // Update count *after* summary
         });
     }
 }
@@ -367,11 +396,12 @@ function updateOrderSummary() {
         if (!isNaN(totalPrice)) subtotal += totalPrice;
     });
     
-    const shipping = subtotal > 0 ? 25.00 : 0;
+    // FIX: Use global variables
+    const shipping = subtotal > 0 ? window.SHIPPING_COST : 0;
     const total = subtotal + shipping;
-    const subtotalUSD = (subtotal * 0.128).toFixed(2);
-    const shippingUSD = (shipping * 0.128).toFixed(2);
-    const totalUSD = (total * 0.128).toFixed(2);
+    const subtotalUSD = (subtotal * window.USD_CONVERSION_RATE).toFixed(2);
+    const shippingUSD = (shipping * window.USD_CONVERSION_RATE).toFixed(2);
+    const totalUSD = (total * window.USD_CONVERSION_RATE).toFixed(2);
     
     $('#subtotal').html(`Q${subtotal.toFixed(2)} <small class="usd-conversion">≈ $${subtotalUSD} USD</small>`);
     $('#shipping').html(shipping > 0 ? `Q${shipping.toFixed(2)} <small class="usd-conversion">≈ $${shippingUSD} USD</small>` : 'Gratis');
@@ -447,10 +477,15 @@ function loadLocalCartToPage() {
                 
                 const price = parseFloat(product.price);
                 const totalPrice = (price * item.quantity).toFixed(2);
-                const totalUSD = (totalPrice * 0.128).toFixed(2);
+                // FIX: Use global variable
+                const totalUSD = (totalPrice * window.USD_CONVERSION_RATE).toFixed(2);
                 
+                // FIX: Added data-size and data-color for guest cart logic
                 html += `
-                    <div class="cart-item" data-item-id="${item.product_id}">
+                    <div class="cart-item" 
+                         data-item-id="${item.product_id}" 
+                         data-size="${item.size || ''}" 
+                         data-color="${item.color || ''}">
                         <div class="item-image">
                             ${product.image_url 
                                 ? `<img src="${product.image_url}" alt="${product.product_name}">`
@@ -481,7 +516,6 @@ function loadLocalCartToPage() {
                 `;
             });
             
-            // ✅ CORRECCIÓN: Usar .cart-items (no .cart-items-container)
             $('.cart-items').html(html);
             $('#cart-with-items').show();
             $('#empty-cart').hide();
