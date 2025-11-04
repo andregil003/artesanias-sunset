@@ -19,11 +19,17 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 <body>
-  <%- include('../partials/header') %>
+  <%- include('../partials/header', { 
+      user: typeof user !== 'undefined' ? user : null, 
+      isAdmin: typeof isAdmin !== 'undefined' ? isAdmin : false, 
+      icons: typeof icons !== 'undefined' ? icons : {} 
+  }) %>
   
   <%- body %>
   
-  <%- include('../partials/footer') %>
+  <%- include('../partials/footer', { 
+      icons: typeof icons !== 'undefined' ? icons : {} 
+  }) %>
   
   <script src="/js/header.js"></script>
   

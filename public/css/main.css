@@ -5,16 +5,17 @@
 /* ========================================
    1. VARIABLES CSS
    ======================================== */
-
+ 
 :root {
-  /* COLORES BASE */
-  --c0: #FFA366;  /* Naranja claro - Acentos suaves */
-  --c1: #FF7F3F;  /* Naranja principal - Color primario de marca */
-  --c2: #D65A31;  /* Naranja oscuro - Hover states y énfasis */
+  /* COLORES BASE - PALETA: MOSTAZA & GRIS PIZARRA */
+  --c0: #F0C040;  /* Mostaza claro - Acentos suaves */
+  --c1: #E1AD01;  /* Mostaza vintage principal - Color primario de marca */
+  --c2: #CC9500;  /* Mostaza oscuro - Hover states y énfasis */
   --c3: #8B4513;  /* Café - Texto secundario y bordes */
-  --c4: #FDF6E3;  /* Crema/Beige - Fondo principal */
+  --c4: #F9F7F4;  /* Crema/Beige ultra claro - Fondo principal */
   --c5: #2C1810;  /* Café oscuro - Texto principal */
-  --c6: #4F7942;  /* Verde - Color secundario (botones alternativos) */
+  --c6: #2F3E46;  /* Gris pizarra - Color secundario (botones alternativos) */
+  --c7: #2C1810;  /* Café oscuro - Fondo del footer */
 
   /* COLORES SEMÁNTICOS (más fácil de leer en el código) */
   --primary-color: var(--c1);      /* Botones principales, enlaces importantes */
@@ -24,6 +25,7 @@
   --text-color: var(--c5);         /* Texto principal (títulos, párrafos) */
   --text-light: var(--c3);         /* Texto secundario (subtítulos, metadata) */
   --background-color: var(--c4);   /* Fondo de páginas */
+  --footer-bg: var(--c7);      /* Fondo del footer */
 
   /* ESPACIADOS (sistema de 4px) */
   --spacing-xs: 4px;    /* Espacios muy pequeños (padding interno de badges) */
@@ -97,7 +99,7 @@ html {
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
   font-size: var(--font-md);
-  background-color: var(--background-color);
+  background: linear-gradient(135deg, var(--background-color) 0%, rgba(225, 173, 1, 0.02) 100%);
   color: var(--text-color);
   line-height: 1.6;
   overflow-x: hidden;
@@ -111,6 +113,7 @@ a {
   color: inherit;
   text-decoration: none;
   transition: color var(--transition-fast);
+  position: relative;
 }
 
 a:hover {
@@ -120,6 +123,23 @@ a:hover {
 a:focus {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
+}
+
+@media (min-width: 1024px) {
+  a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--primary-color);
+    transition: width var(--transition-normal);
+  }
+
+  a:hover::after {
+    width: 100%;
+  }
 }
 
 /* Botones */
@@ -242,6 +262,11 @@ p {
   }
 }
 
+/* Secciones alternas con fondo sutilmente coloreado */
+.section:nth-child(even) {
+  background: linear-gradient(135deg, rgba(225, 173, 1, 0.03) 0%, rgba(47, 62, 70, 0.02) 100%);
+}
+
 /* Contenido principal (espacio para header SOLAMENTE) */
 #main-content {
   min-height: calc(100vh - var(--header-height-mobile));
@@ -306,6 +331,8 @@ p {
   border: var(--border-width) solid transparent;
   transition: all var(--transition-fast);
   user-select: none;
+  position: relative;
+  overflow: hidden;
 }
 
 .btn:active {
@@ -324,6 +351,26 @@ p {
   box-shadow: var(--shadow-md);
 }
 
+.btn-primary::before,
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+  .btn-primary:active::before {
+    animation: ripple 0.6s ease-out;
+  }
+}
+
 /* Botón secundario */
 .btn-secondary {
   background-color: var(--secondary-color);
@@ -334,6 +381,25 @@ p {
   background-color: var(--text-light);
   color: white;
   box-shadow: var(--shadow-md);
+}
+
+.btn-secondary::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+  .btn-secondary:active::before {
+    animation: ripple 0.6s ease-out;
+  }
 }
 
 /* Botón outline */
@@ -366,6 +432,18 @@ p {
   width: 100%;
 }
 
+@keyframes ripple {
+  0% {
+    width: 0;
+    height: 0;
+  }
+  100% {
+    width: 300px;
+    height: 300px;
+    opacity: 0;
+  }
+}
+
 /* ========================================
    7. CARDS DE PRODUCTOS
    ======================================== */
@@ -377,11 +455,16 @@ p {
   padding: var(--spacing-md);
   transition: all var(--transition-normal);
   cursor: pointer;
+  animation: slideUp 0.5s ease-out;
+  border-left: 4px solid transparent;
+  position: relative;
 }
 
 .product-card:hover {
   border-color: var(--primary-color);
-  box-shadow: var(--shadow-md);
+  border-left-color: var(--secondary-color);
+  box-shadow: 0 8px 16px rgba(225, 173, 1, 0.12), 0 0 0 1px rgba(47, 62, 70, 0.08);
+  background: linear-gradient(135deg, rgba(225, 173, 1, 0.02) 0%, rgba(47, 62, 70, 0.02) 100%);
   transform: translateY(-2px);
 }
 
@@ -391,6 +474,7 @@ p {
   object-fit: cover;
   border-radius: var(--border-radius-sm);
   margin-bottom: var(--spacing-sm);
+  transition: transform var(--transition-normal);
 }
 
 .product-card h3 {
@@ -412,14 +496,33 @@ p {
 
 .product-card .category {
   font-size: var(--font-sm);
-  color: var(--text-light);
+  color: var(--secondary-color);
   margin-bottom: var(--spacing-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* Desktop - imágenes más grandes */
 @media (min-width: 1024px) {
   .product-card img {
     height: 250px;
+  }
+
+  .product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(225, 173, 1, 0.15), 0 0 0 1px rgba(47, 62, 70, 0.1);
+  }
+
+  .product-card:hover img {
+    transform: scale(1.05);
+  }
+}
+
+/* Mobile - versión más sutil */
+@media (max-width: 1023px) {
+  .product-card:active {
+    transform: scale(0.98);
   }
 }
 
@@ -447,12 +550,13 @@ p {
   background-color: white;
   font-size: var(--font-md);
   transition: border-color var(--transition-fast);
+  position: relative;
 }
 
 .form-control:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(255, 127, 63, 0.1);
+  box-shadow: 0 0 0 3px rgba(225, 173, 1, 0.1);
 }
 
 .form-control::placeholder {
@@ -523,10 +627,72 @@ textarea.form-control {
   }
 }
 
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .fade-in {
   animation: fadeIn var(--transition-normal);
 }
 
 .slide-up {
   animation: slideUp var(--transition-normal);
+}
+
+/* Animación suave para headers */
+header {
+  animation: slideInDown 0.4s ease-out;
+}
+
+.badge {
+  animation: scaleIn var(--transition-normal);
 }

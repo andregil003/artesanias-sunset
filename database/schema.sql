@@ -1,8 +1,6 @@
 -- ========================================
 -- ARTESANÍAS SUNSET - SCHEMA FINAL
 -- PostgreSQL 14+
--- Última actualización: 2025-10-09
--- Cambios: +currency_code en orders (conecta con currencies)
 -- ========================================
 
 -- ========================================
@@ -136,6 +134,7 @@ CREATE TABLE customers (
     last_name VARCHAR(50) NOT NULL,
     phone VARCHAR(20),
     city_id INTEGER,
+    is_admin BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP,
     google_id VARCHAR(255) UNIQUE,

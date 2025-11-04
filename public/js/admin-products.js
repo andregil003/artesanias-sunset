@@ -1,4 +1,4 @@
-/* public/js/admin-products.js */
+// public/js/admin-products.js
 $(document).ready(function() {
     $('.btn-action.delete').on('click', handleDelete);
     $('.filter-select').on('change', function() {
@@ -15,8 +15,7 @@ function handleDelete(e) {
     
     if (!confirm(`¿Desactivar "${productName}"?\n\nSe marcará como inactivo.`)) return;
     
-    // FIX: Use class toggle, not inline .css()
-    $btn.prop('disabled', true).addClass('is-loading');
+    $btn.prop('disabled', true).css('opacity', '0.5');
     
     $.ajax({
         url: `/admin/products/${productId}`,
@@ -32,14 +31,12 @@ function handleDelete(e) {
                 showToast('Producto desactivado correctamente', 'success');
             } else {
                 showToast(response.message || 'Error al desactivar', 'error');
-                // FIX: Remove class, not inline .css()
-                $btn.prop('disabled', false).removeClass('is-loading');
+                $btn.prop('disabled', false).css('opacity', '1');
             }
         },
         error: function(xhr) {
             showToast(xhr.responseJSON?.message || 'Error al desactivar producto', 'error');
-            // FIX: Remove class, not inline .css()
-            $btn.prop('disabled', false).removeClass('is-loading');
+            $btn.prop('disabled', false).css('opacity', '1');
         }
     });
 }
@@ -56,12 +53,6 @@ function showUrlMessages() {
     
     if (messages[success]) {
         showToast(messages[success], 'success');
-        
-        // FIX: Remove only the 'success' param, keep other filters
-        urlParams.delete('success');
-        const newSearch = urlParams.toString();
-        const newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '');
-        
-        window.history.replaceState({}, '', newUrl);
+        window.history.replaceState({}, '', '/admin/products');
     }
 }

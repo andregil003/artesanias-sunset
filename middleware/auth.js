@@ -1,4 +1,4 @@
-// middleware/auth.js - OPTIMIZADO
+// middleware/auth.js 
 
 // Verificar si el usuario está autenticado
 export function isAuthenticated(req, res, next) {
@@ -25,11 +25,3 @@ export function isAdmin(req, res, next) {
     });
 }
 
-// Verificar si el usuario es cliente autenticado o invitado con sesión
-export function isCustomerOrGuest(req, res, next) {
-    // Permitir si está autenticado o tiene sesión activa
-    if (req.isAuthenticated() || req.session) {
-        return next();
-    }
-    res.redirect('/auth/login?error=authentication_required');
-}

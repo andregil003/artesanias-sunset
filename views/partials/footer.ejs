@@ -1,36 +1,72 @@
 <!-- views/partials/footer.ejs -->
 <footer id="main-footer">
     <div class="footer-content">
-        <div class="footer-section">
-            <h3>Contacto</h3>
-            <p><i class="<%= icons.phone %> footer-icon"></i> +502 4129-8574</p>
-            <p><i class="<%= icons.contact %> footer-icon"></i> <%= contactEmail %></p>
-            <p><i class="<%= icons.location %> footer-icon"></i> Guatemala</p>
-        </div>
         
         <div class="footer-section">
             <h3>Enlaces</h3>
             <ul class="footer-links">
-                <li><a href="/"><i class="<%= icons.home %> footer-icon"></i> Inicio</a></li>
-                <li><a href="/catalog"><i class="<%= icons.catalogBag %> footer-icon"></i> Catálogo</a></li>
-                <li><a href="/contact"><i class="<%= icons.contactMessage %> footer-icon"></i> Contacto</a></li>
+                <li><a href="/"><i class="<%= icons.home %> footer-icon" aria-hidden="true"></i> Inicio</a></li>
+                <li><a href="/catalog"><i class="<%= icons.catalogBag %> footer-icon" aria-hidden="true"></i> Catálogo</a></li>
+                <li><a href="/contact"><i class="<%= icons.contactMessage %> footer-icon" aria-hidden="true"></i> Contacto</a></li>
             </ul>
+        </div>
+
+        <div class="footer-section">
+            <h3>Contacto</h3>
+            <address class="footer-contact">
+                <p>
+                    <i class="<%= icons.location %> footer-icon" aria-hidden="true"></i>
+                    Guatemala
+                </p>
+                <p>
+                    <i class="<%= icons.phone %> footer-icon" aria-hidden="true"></i> <a href="tel:+50241298574">+502 4129-8574</a>
+                </p>
+                <p>
+                    <i class="<%= icons.contact %> footer-icon" aria-hidden="true"></i> <a href="mailto:andregil003@gmail.com">andregil003@gmail.com</a>
+                </p>
+            </address>
         </div>
         
         <div class="footer-section">
-            <a href="https://wa.me/<%= whatsappNumber %>" 
-               class="whatsapp-btn" target="_blank" rel="noopener">
-                <i class="<%= icons.whatsapp %> btn-icon"></i>
-                Chatear por WhatsApp
-            </a>
+            <h3>Síguenos</h3>
+            <ul class="social-links">
+                <li>
+                    <a href="https://wa.me/<%= whatsappNumber %>" target="_blank" rel="noopener" aria-label="Chatear por WhatsApp">
+                        <i class="<%= icons.whatsapp %> footer-icon" aria-hidden="true"></i>
+                        <span class="sr-only">WhatsApp</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://www.facebook.com/artesaniassunset185" target="_blank" rel="noopener" aria-label="Visitar nuestra página de Facebook">
+                        <i class="fa-brands fa-facebook-f footer-icon" aria-hidden="true"></i>
+                        <span class="sr-only">Facebook</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://www.instagram.com/185_artesaniassunset" target="_blank" rel="noopener" aria-label="Visitar nuestro perfil de Instagram">
+                        <i class="fa-brands fa-instagram footer-icon" aria-hidden="true"></i>
+                        <span class="sr-only">Instagram</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="https://www.tiktok.com/@artesanias.sunset" target="_blank" rel="noopener" aria-label="Visitar nuestro perfil de TikTok">
+                        <i class="fa-brands fa-tiktok footer-icon" aria-hidden="true"></i>
+                        <span class="sr-only">TikTok</span>
+                    </a>
+                </li>
+                </ul>
         </div>
+
     </div>
     
     <div class="footer-bottom">
         <p>
-            <i class="<%= icons.copyright %> footer-icon-small"></i>
+            <i class="<%= icons.copyright %> footer-icon-small" aria-hidden="true"></i>
+            <span class="sr-only">Copyright</span>
             2025 Artesanías Sunset. Hecho con 
-            <i class="<%= icons.heart %> footer-icon-small heart"></i> 
+            <i class="<%= icons.heart %> footer-icon-small heart" aria-hidden="true"></i> 
+            <span class="sr-only">amor</span>
             en Guatemala.
         </p>
     </div>

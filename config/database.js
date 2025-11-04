@@ -5,19 +5,24 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Validar variables de entorno obligatorias
+// ========================================
+// VALIDAR VARIABLES DE ENTORNO
+// ========================================
 const requiredEnvVars = ['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASSWORD'];
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingVars.length > 0) {
     console.error('❌ Variables de entorno faltantes:', missingVars.join(', '));
+    console.error('📋 Requiere: DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD');
     process.exit(1);
 }
 
-// Configuración del pool de conexiones
-const pool = new Pool({
+// ========================================
+// CREAR POOL DE CONEXIONES
+// ========================================
+export const pool = new Pool({
     host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT),
+    port: parseInt(process.env.DB_PORT, 10),
     database: process.env.DB_NAME,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
@@ -26,31 +31,44 @@ const pool = new Pool({
     connectionTimeoutMillis: 2000,
 });
 
-// Event listeners
+// ========================================
+// EVENT LISTENERS
+// ========================================
 pool.on('connect', () => {
-    console.log('🔗 Conectado a PostgreSQL');
+    console.log('🔗 Cliente conectado al pool de PostgreSQL');
 });
 
 pool.on('error', (err) => {
-    console.error('❌ Error en PostgreSQL:', err.message);
+    console.error('❌ Error no esperado en el pool de PostgreSQL:', err.message);
 });
 
-// Probar la conexión al iniciar
-const testConnection = async () => {
+// ========================================
+// PROBAR CONEXIÓN
+// ========================================
+export const testConnection = async () => {
     try {
         const client = await pool.connect();
         const result = await client.query('SELECT NOW()');
-        console.log('✅ Base de datos conectada exitosamente');
+        console.log('✅ Conexión a la base de datos exitosa');
         console.log(`📅 Timestamp del servidor: ${result.rows[0].now}`);
         client.release();
         return true;
     } catch (err) {
         console.error('❌ Error conectando a la base de datos:', err.message);
+        console.error('🔍 Verifica:', {
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT,
+            database: process.env.DB_NAME,
+            user: process.env.DB_USER,
+            'password': '***'
+        });
         return false;
     }
 };
 
-// Cerrar el pool al terminar la aplicación
+// ========================================
+// CERRAR POOL
+// ========================================
 const closePool = async () => {
     try {
         await pool.end();
@@ -60,15 +78,19 @@ const closePool = async () => {
     }
 };
 
-// Capturar señales de terminación
+// ========================================
+// CAPTURAR SEÑALES DE TERMINACIÓN
+// ========================================
 process.on('SIGINT', async () => {
+    console.log('\n🛑 Recibida señal SIGINT');
     await closePool();
     process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
+    console.log('\n🛑 Recibida señal SIGTERM');
     await closePool();
     process.exit(0);
 });
 
-export { pool, testConnection };
+export default { pool, testConnection };

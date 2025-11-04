@@ -329,10 +329,3 @@ Consultas complejas pre-definidas para análisis
 - [ ] Vistas funcionando correctamente
 
 ---
-
-## 📞 Contacto
-
-Si tienes problemas, revisa los logs de error y verifica:
-1. Conexión a PostgreSQL
-2. Credenciales en `.env`
-3. Que todas las dependencias estén instaladas

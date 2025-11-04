@@ -1,7 +1,6 @@
 // ========================================
 // ARTESANÍAS SUNSET - SEED DATA FINAL
 // Archivo: database/seed_data.js
-// ES Modules Version - Con currency_code
 // ========================================
 
 import { faker } from '@faker-js/faker';

@@ -1,0 +1,41 @@
+/* public/css/admin-dashboard.css */
+.dashboard-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+.proyectos-lista {
+    margin-top: 2rem;
+}
+.proyectos-lista .lista-items {
+    list-style: none;
+    padding: 0;
+}
+.proyectos-lista .item-proyecto {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    background: #fff;
+    margin-bottom: 0.5rem;
+    border-radius: 5px;
+}
+.proyectos-lista .proyecto-nombre {
+    font-weight: 600;
+}
+.proyectos-lista .btn-visitar {
+    text-decoration: none;
+    background-color: #007bff; /* Color primario, cámbialo si quieres */
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+.proyectos-lista .btn-visitar:hover {
+    background-color: #0056b3;
+}

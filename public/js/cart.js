@@ -4,6 +4,18 @@ $(document).ready(function() {
     console.log('🔐 Usuario logueado:', isUserLoggedIn());
     console.log('📍 Ruta actual:', window.location.pathname);
     
+    // ✅ CRÍTICO: Detectar logout por parámetro URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('logout')) {
+        console.log('🚪 Logout detectado, limpiando localStorage...');
+        clearLocalCart();
+        localStorage.removeItem('was_logged_in');
+        sessionStorage.clear();
+    }
+    
+    // ✅ Verificar si se cerró sesión y limpiar localStorage viejo
+    checkAndCleanOldCart();
+    
     loadLocalCartToPage();
     syncCartOnLoad();
     updateCartCount();
@@ -29,36 +41,36 @@ $(document).ready(function() {
         $(this).addClass('selected');
     });
     
-    // FIX: Pass $(this) to the update function instead of just the ID
     $(document).on('click', '.qty-btn', function() {
         const action = $(this).data('action');
         const input = $(this).siblings('.qty-input');
+        const cartItemId = $(this).closest('.cart-item').data('item-id');
         let currentValue = parseInt(input.val());
         
         if (action === 'increase' && currentValue < 15) {
             input.val(currentValue + 1);
-            updateCartItemQuantity($(this), currentValue + 1);
+            updateCartItemQuantity(cartItemId, currentValue + 1);
         } else if (action === 'decrease' && currentValue > 1) {
             input.val(currentValue - 1);
-            updateCartItemQuantity($(this), currentValue - 1);
+            updateCartItemQuantity(cartItemId, currentValue - 1);
         }
     });
     
-    // FIX: Pass $(this) to the update function
     $(document).on('change', '.qty-input', function() {
+        const cartItemId = $(this).closest('.cart-item').data('item-id');
         let newQuantity = parseInt($(this).val());
         
         if (isNaN(newQuantity) || newQuantity < 1) newQuantity = 1;
         else if (newQuantity > 15) newQuantity = 15;
         
         $(this).val(newQuantity);
-        updateCartItemQuantity($(this), newQuantity);
+        updateCartItemQuantity(cartItemId, newQuantity);
     });
     
-    // FIX: Pass $(this) to the remove function
     $(document).on('click', '.remove-item', function() {
         if (confirm('¿Eliminar este producto?')) {
-            removeFromCart($(this));
+            const cartItemId = $(this).closest('.cart-item').data('item-id');
+            removeFromCart(cartItemId);
         }
     });
     
@@ -78,8 +90,7 @@ $(document).ready(function() {
             subtotal += price * quantity;
         });
         
-        // FIX: Use global variable
-        const shipping = window.SHIPPING_COST;
+        const shipping = 25.00;
         const total = subtotal + shipping;
         
         let orderDetails = '';
@@ -101,12 +112,11 @@ $(document).ready(function() {
             'Hola, quiero hacer este pedido:%0A%0A' + 
             orderDetails + '%0A' +
             'Subtotal: Q' + subtotal.toFixed(2) + '%0A' +
-            'Envío: Q' + shipping.toFixed(2) + '%0A' +
+            'Envío: Q25.00%0A' +
             'Total: Q' + total.toFixed(2) + '%0A%0A' +
             '¡Gracias!';
         
-        // FIX: Use global variable
-        window.open('https://wa.me/' + window.WHATSAPP_NUMBER + '?text=' + message, '_blank');
+        window.open('https://wa.me/50241298574?text=' + message, '_blank');
     });
 });
 
@@ -134,24 +144,92 @@ function saveLocalCart(cart) {
 function clearLocalCart() {
     try {
         localStorage.removeItem('guest_cart');
+        localStorage.removeItem('cart_synced');
+        console.log('🧹 localStorage limpiado');
     } catch (e) {
         console.error('Error limpiando localStorage:', e);
     }
 }
 
-// FIX: Replaced broken DOM-check with reliable global variable
+// ========================================
+// DETECCIÓN DE USUARIO LOGUEADO
+// ========================================
+/**
+ * ✅ CORREGIDO: Busca .user-link en lugar de #user-profile-link
+ * El elemento correcto está en header.ejs: <a href="/auth/profile" class="user-link">
+ */
 function isUserLoggedIn() {
-    return window.IS_USER_LOGGED_IN === true;
+    // Método 1: Buscar el enlace del perfil (header.ejs: .user-link)
+    if (document.querySelector('.user-link')) {
+        console.log('✅ Usuario detectado por .user-link');
+        return true;
+    }
+
+    // Método 2: Buscar menú del usuario en nav móvil
+    if (document.querySelector('.nav-user-info')) {
+        console.log('✅ Usuario detectado por .nav-user-info');
+        return true;
+    }
+
+    // Método 3: Verificar presencia de botón logout
+    if (document.querySelector('a[href="/auth/logout"]')) {
+        console.log('✅ Usuario detectado por link de logout');
+        return true;
+    }
+
+    // Método 4: Detectar si recién inició sesión
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('welcome')) {
+        console.log('✅ Usuario detectado por parámetro welcome');
+        return true;
+    }
+
+    console.log('❌ Usuario no logueado detectado');
+    return false;
+}
+
+// ✅ NUEVA FUNCIÓN: Verificar y limpiar carrito obsoleto
+function checkAndCleanOldCart() {
+    const wasLoggedIn = localStorage.getItem('was_logged_in') === 'true';
+    const isCurrentlyLoggedIn = isUserLoggedIn();
+    
+    // Si antes estaba logueado y ahora NO, limpiar localStorage
+    if (wasLoggedIn && !isCurrentlyLoggedIn) {
+        console.log('🚪 Sesión cerrada detectada, limpiando localStorage...');
+        clearLocalCart();
+        sessionStorage.clear();
+    }
+    
+    // Actualizar el estado actual
+    if (isCurrentlyLoggedIn) {
+        localStorage.setItem('was_logged_in', 'true');
+    } else {
+        localStorage.removeItem('was_logged_in');
+    }
 }
 
 // ========================================
 // SINCRONIZACIÓN
 // ========================================
 function syncCartOnLoad() {
-    if (!isUserLoggedIn()) return;
+    if (!isUserLoggedIn()) {
+        console.log('⏭️ Usuario no logueado, saltando sincronización');
+        return;
+    }
     
     const localCart = getLocalCart();
-    if (localCart.length === 0) return;
+    if (localCart.length === 0) {
+        console.log('⏭️ No hay items locales para sincronizar');
+        return;
+    }
+    
+    // ✅ Verificar si ya se sincronizó en esta sesión
+    const alreadySynced = sessionStorage.getItem('cart_synced') === 'true';
+    if (alreadySynced) {
+        console.log('⏭️ Carrito ya fue sincronizado en esta sesión');
+        clearLocalCart();
+        return;
+    }
     
     console.log('🔄 Migrando', localCart.length, 'items a BD...');
     
@@ -162,17 +240,19 @@ function syncCartOnLoad() {
         data: JSON.stringify({ items: localCart }),
         success: function(response) {
             if (response.success) {
-                console.log('✅', response.message);
+                console.log('✅', response.message || 'Carrito sincronizado');
                 clearLocalCart();
+                sessionStorage.setItem('cart_synced', 'true');
                 updateCartCount();
-                // Reload to show the server-rendered cart
-                if (window.location.pathname.includes('/cart')) {
-                    window.location.reload();
-                }
+            } else {
+                console.warn('⚠️', response.message);
+                clearLocalCart(); // Limpiar de todas formas
             }
         },
         error: function(xhr) {
-            console.error('Error migrando carrito:', xhr.responseJSON?.message);
+            console.error('❌ Error migrando carrito:', xhr.responseJSON?.message || xhr.statusText);
+            // ✅ Limpiar localStorage incluso si falla
+            clearLocalCart();
         }
     });
 }
@@ -191,6 +271,7 @@ function addToCart(productId, quantity = 1, size = '', color = '', $btn) {
                 if (response.success) {
                     updateCartCount();
                     animateCartIcon();
+                    console.log('✅ Producto agregado al carrito (BD)');
                 } else {
                     showMessage(response.message || 'Error al agregar producto', 'error');
                     if ($btn) $btn.prop('disabled', false).text('Agregar al Carrito');
@@ -226,18 +307,15 @@ function addToCart(productId, quantity = 1, size = '', color = '', $btn) {
         saveLocalCart(cart);
         updateCartCount();
         animateCartIcon();
+        console.log('✅ Producto agregado al carrito (localStorage)');
     }
 }
 
 // ========================================
 // ACTUALIZAR
 // ========================================
-// FIX: Refactored function to accept the element, not just an ID
-function updateCartItemQuantity($element, quantity) {
-    const $cartItem = $element.closest('.cart-item');
-
+function updateCartItemQuantity(itemId, quantity) {
     if (isUserLoggedIn()) {
-        const itemId = $cartItem.data('item-id'); // This is the DB ID
         $.ajax({
             url: `/cart/update/${itemId}`,
             method: 'PUT',
@@ -245,10 +323,10 @@ function updateCartItemQuantity($element, quantity) {
             data: JSON.stringify({ quantity }),
             success: function(response) {
                 if (response.success) {
+                    const $cartItem = $(`.cart-item[data-item-id="${itemId}"]`);
                     const price = parseFloat($cartItem.find('.item-price').text().replace('Q', '').trim());
                     const totalPrice = (price * quantity).toFixed(2);
-                    // FIX: Use global variable
-                    const totalUSD = (totalPrice * window.USD_CONVERSION_RATE).toFixed(2);
+                    const totalUSD = (totalPrice * 0.128).toFixed(2);
                     
                     $cartItem.find('.total-price').html(`
                         Q${totalPrice}
@@ -264,26 +342,17 @@ function updateCartItemQuantity($element, quantity) {
             }
         });
     } else {
-        // FIX: Use full key (product_id, size, color) for local cart
-        const productId = $cartItem.data('item-id'); // This is product_id
-        const size = $cartItem.data('size');
-        const color = $cartItem.data('color');
         const cart = getLocalCart();
-        
-        const index = cart.findIndex(item => 
-            item.product_id == productId && 
-            item.size == size && 
-            item.color == color
-        );
+        const index = cart.findIndex(item => item.product_id == itemId);
         
         if (index !== -1) {
             cart[index].quantity = quantity;
             saveLocalCart(cart);
             
+            const $cartItem = $(`.cart-item[data-item-id="${itemId}"]`);
             const price = parseFloat($cartItem.find('.item-price').text().replace('Q', '').trim());
             const totalPrice = (price * quantity).toFixed(2);
-            // FIX: Use global variable
-            const totalUSD = (totalPrice * window.USD_CONVERSION_RATE).toFixed(2);
+            const totalUSD = (totalPrice * 0.128).toFixed(2);
             
             $cartItem.find('.total-price').html(`
                 Q${totalPrice}
@@ -299,25 +368,21 @@ function updateCartItemQuantity($element, quantity) {
 // ========================================
 // ELIMINAR
 // ========================================
-// FIX: Refactored function to accept the element
-function removeFromCart($element) {
-    const $cartItem = $element.closest('.cart-item');
-
+function removeFromCart(itemId) {
     if (isUserLoggedIn()) {
-        const itemId = $cartItem.data('item-id'); // This is the DB ID
         $.ajax({
             url: `/cart/remove/${itemId}`,
             method: 'DELETE',
             success: function(response) {
                 if (response.success) {
-                    $cartItem.fadeOut(400, function() {
+                    $(`.cart-item[data-item-id="${itemId}"]`).fadeOut(400, function() {
                         $(this).remove();
                         if ($('.cart-item').length === 0) {
                             showEmptyCart();
                         } else {
                             updateOrderSummary();
+                            updateCartCount();
                         }
-                        updateCartCount(); // Update count *after* summary
                     });
                 }
             },
@@ -326,25 +391,18 @@ function removeFromCart($element) {
             }
         });
     } else {
-        // FIX: Use full key (product_id, size, color) for local cart
-        const productId = $cartItem.data('item-id'); // This is product_id
-        const size = $cartItem.data('size');
-        const color = $cartItem.data('color');
         const cart = getLocalCart();
-        
-        const newCart = cart.filter(item => 
-            !(item.product_id == productId && item.size == size && item.color == color)
-        );
+        const newCart = cart.filter(item => item.product_id != itemId);
         saveLocalCart(newCart);
         
-        $cartItem.fadeOut(400, function() {
+        $(`.cart-item[data-item-id="${itemId}"]`).fadeOut(400, function() {
             $(this).remove();
             if ($('.cart-item').length === 0) {
                 showEmptyCart();
             } else {
                 updateOrderSummary();
+                updateCartCount();
             }
-            updateCartCount(); // Update count *after* summary
         });
     }
 }
@@ -371,7 +429,7 @@ function updateCartCount() {
         const count = cart.reduce((sum, item) => sum + item.quantity, 0);
         const $counter = $('.cart-count, #cart-count');
         
-        console.log('📊 Contador:', count);
+        console.log('📊 Contador invitado:', count);
         $counter.text(count);
         $counter.css('opacity', count > 0 ? '1' : '0').css('transform', count > 0 ? 'scale(1)' : 'scale(0.8)');
     }
@@ -396,12 +454,11 @@ function updateOrderSummary() {
         if (!isNaN(totalPrice)) subtotal += totalPrice;
     });
     
-    // FIX: Use global variables
-    const shipping = subtotal > 0 ? window.SHIPPING_COST : 0;
+    const shipping = subtotal > 0 ? 25.00 : 0;
     const total = subtotal + shipping;
-    const subtotalUSD = (subtotal * window.USD_CONVERSION_RATE).toFixed(2);
-    const shippingUSD = (shipping * window.USD_CONVERSION_RATE).toFixed(2);
-    const totalUSD = (total * window.USD_CONVERSION_RATE).toFixed(2);
+    const subtotalUSD = (subtotal * 0.128).toFixed(2);
+    const shippingUSD = (shipping * 0.128).toFixed(2);
+    const totalUSD = (total * 0.128).toFixed(2);
     
     $('#subtotal').html(`Q${subtotal.toFixed(2)} <small class="usd-conversion">≈ $${subtotalUSD} USD</small>`);
     $('#shipping').html(shipping > 0 ? `Q${shipping.toFixed(2)} <small class="usd-conversion">≈ $${shippingUSD} USD</small>` : 'Gratis');
@@ -436,11 +493,17 @@ function showMessage(message, type = 'error') {
 // CARGAR CARRITO LOCAL (INVITADOS)
 // ========================================
 function loadLocalCartToPage() {
-    if (isUserLoggedIn()) return;
-    if (!window.location.pathname.includes('/cart')) return;
+    if (isUserLoggedIn()) {
+        console.log('⏭️ Usuario logueado, saltando carga local');
+        return;
+    }
+    if (!window.location.pathname.includes('/cart')) {
+        console.log('⏭️ No está en /cart, saltando carga local');
+        return;
+    }
     
     const cart = getLocalCart();
-    console.log('📦 Carrito a cargar:', cart);
+    console.log('📦 Carrito local a cargar:', cart);
     
     if (cart.length === 0) {
         $('#cart-with-items').hide();
@@ -477,15 +540,10 @@ function loadLocalCartToPage() {
                 
                 const price = parseFloat(product.price);
                 const totalPrice = (price * item.quantity).toFixed(2);
-                // FIX: Use global variable
-                const totalUSD = (totalPrice * window.USD_CONVERSION_RATE).toFixed(2);
+                const totalUSD = (totalPrice * 0.128).toFixed(2);
                 
-                // FIX: Added data-size and data-color for guest cart logic
                 html += `
-                    <div class="cart-item" 
-                         data-item-id="${item.product_id}" 
-                         data-size="${item.size || ''}" 
-                         data-color="${item.color || ''}">
+                    <div class="cart-item" data-item-id="${item.product_id}">
                         <div class="item-image">
                             ${product.image_url 
                                 ? `<img src="${product.image_url}" alt="${product.product_name}">`

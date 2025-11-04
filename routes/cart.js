@@ -7,8 +7,16 @@ const router = express.Router();
 const MAX_QUANTITY_PER_ITEM = 15;
 const MAX_DIFFERENT_ITEMS = 50;
 
-// FIX: Removed redundant validateSession function.
-// express-session guarantees req.sessionID exists.
+function validateSession(req, res) {
+    if (!req.sessionID) {
+        res.status(400).json({ 
+            success: false, 
+            message: 'Sesión inválida' 
+        });
+        return false;
+    }
+    return true;
+}
 
 function getUserIdentifier(req) {
     return req.user ? req.user.customer_id : req.sessionID;
@@ -18,12 +26,19 @@ function getUserColumn(req) {
     return req.user ? 'customer_id' : 'session_id';
 }
 
-// FIX: This route now correctly fetches the cart for
-// both authenticated users and guests using the helper functions.
 router.get('/', async (req, res) => {
     try {
-        const identifier = getUserIdentifier(req);
-        const column = getUserColumn(req);
+        if (!req.user) {
+            return res.render('pages/cart', {
+                title: 'Carrito - Artesanías Sunset',
+                pageCSS: '/css/cart.css',
+                pageJS: ['/js/cart.js'],
+                cartItems: [],
+                subtotal: 0,
+                shipping: 0,
+                total: 0
+            });
+        }
         
         const result = await pool.query(
             `SELECT 
@@ -41,14 +56,13 @@ router.get('/', async (req, res) => {
              FROM cart_items ci
              JOIN products p ON ci.product_id = p.product_id
              LEFT JOIN categories c ON p.category_id = c.category_id
-             WHERE ci.${column} = $1 AND p.is_active = true
+             WHERE ci.customer_id = $1 AND p.is_active = true
              ORDER BY ci.created_at DESC`,
-            [identifier]
+            [req.user.customer_id]
         );
         
         const cartItems = result.rows;
         const subtotal = cartItems.reduce((sum, item) => sum + parseFloat(item.item_total), 0);
-        // Note: Shipping calculation is hardcoded and should be dynamic.
         const shipping = cartItems.length > 0 ? 25.00 : 0;
         const total = subtotal + shipping;
         
@@ -74,7 +88,8 @@ router.get('/', async (req, res) => {
 
 router.get('/count', async (req, res) => {
     try {
-        // FIX: Removed call to validateSession
+        if (!validateSession(req, res)) return;
+        
         const identifier = getUserIdentifier(req);
         const column = getUserColumn(req);
         
@@ -101,7 +116,8 @@ router.get('/count', async (req, res) => {
 
 router.post('/add', async (req, res) => {
     try {
-        // FIX: Removed call to validateSession
+        if (!validateSession(req, res)) return;
+        
         const { product_id, quantity = 1, size = '', color = '' } = req.body;
         
         if (!product_id || quantity < 1 || quantity > MAX_QUANTITY_PER_ITEM) {
@@ -113,6 +129,20 @@ router.post('/add', async (req, res) => {
         
         const identifier = getUserIdentifier(req);
         const column = getUserColumn(req);
+        
+        const countResult = await pool.query(
+            `SELECT COUNT(DISTINCT product_id) as count 
+             FROM cart_items 
+             WHERE ${column} = $1`,
+            [identifier]
+        );
+        
+        if (parseInt(countResult.rows[0].count) >= MAX_DIFFERENT_ITEMS) {
+            return res.status(400).json({ 
+                success: false, 
+                message: `Límite de ${MAX_DIFFERENT_ITEMS} productos diferentes alcanzado` 
+            });
+        }
         
         const productResult = await pool.query(
             'SELECT stock, is_active FROM products WHERE product_id = $1',
@@ -149,22 +179,6 @@ router.post('/add', async (req, res) => {
                 message: 'Cantidad actualizada' 
             });
         }
-
-        // FIX: Moved item limit check here.
-        // Only check when adding a *new* distinct item.
-        const countResult = await pool.query(
-            `SELECT COUNT(DISTINCT product_id) as count 
-             FROM cart_items 
-             WHERE ${column} = $1`,
-            [identifier]
-        );
-        
-        if (parseInt(countResult.rows[0].count) >= MAX_DIFFERENT_ITEMS) {
-            return res.status(400).json({ 
-                success: false, 
-                message: `Límite de ${MAX_DIFFERENT_ITEMS} productos diferentes alcanzado` 
-            });
-        }
         
         const insertQuery = req.user
             ? 'INSERT INTO cart_items (customer_id, product_id, quantity, size, color) VALUES ($1, $2, $3, $4, $5)'
@@ -188,7 +202,8 @@ router.post('/add', async (req, res) => {
 
 router.put('/update/:id', async (req, res) => {
     try {
-        // FIX: Removed call to validateSession
+        if (!validateSession(req, res)) return;
+        
         const cartItemId = parseInt(req.params.id);
         const { quantity } = req.body;
         
@@ -248,7 +263,8 @@ router.put('/update/:id', async (req, res) => {
 
 router.delete('/remove/:id', async (req, res) => {
     try {
-        // FIX: Removed call to validateSession
+        if (!validateSession(req, res)) return;
+        
         const cartItemId = parseInt(req.params.id);
         
         if (isNaN(cartItemId)) {

@@ -26,17 +26,18 @@ $(document).ready(function() {
     });
     
     // Slider de precio
-    const minSlider = $('#min-price-slider')[0];
-    const maxSlider = $('#max-price-slider')[0];
-    const minDisplay = $('#min-price-display');
-    const maxDisplay = $('#max-price-display');
-    const sliderRange = $('#slider-range');
+    const minSlider = document.getElementById('min-price-slider');
+    const maxSlider = document.getElementById('max-price-slider');
+    const minDisplay = document.getElementById('min-price-display');
+    const maxDisplay = document.getElementById('max-price-display');
+    const sliderRange = document.getElementById('slider-range');
     
     if (minSlider && maxSlider) {
         function updateSlider() {
             let minVal = parseInt(minSlider.value);
             let maxVal = parseInt(maxSlider.value);
             
+            // Evitar cruce
             if (minVal > maxVal - 100) {
                 minVal = maxVal - 100;
                 minSlider.value = minVal;
@@ -47,20 +48,20 @@ $(document).ready(function() {
                 maxSlider.value = maxVal;
             }
             
-            minDisplay.text(minVal);
-            maxDisplay.text(maxVal);
+            // Actualizar displays
+            minDisplay.textContent = minVal;
+            maxDisplay.textContent = maxVal;
             
+            // Barra visual
             const minPercent = (minVal / 3000) * 100;
             const maxPercent = (maxVal / 3000) * 100;
             
-            sliderRange.css({
-                left: minPercent + '%',
-                width: (maxPercent - minPercent) + '%'
-            });
+            sliderRange.style.left = minPercent + '%';
+            sliderRange.style.width = (maxPercent - minPercent) + '%';
         }
         
-        $(minSlider).on('input', updateSlider);
-        $(maxSlider).on('input', updateSlider);
+        minSlider.addEventListener('input', updateSlider);
+        maxSlider.addEventListener('input', updateSlider);
         updateSlider();
     }
 });

@@ -4,8 +4,6 @@ import { pool } from '../config/database.js';
 
 const router = express.Router();
 
-// FIX: Removed getCategorySlug function. Slugs are now fetched from the DB.
-
 router.post('/batch', async (req, res) => {
     try {
         const { ids } = req.body;

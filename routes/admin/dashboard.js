@@ -1,13 +1,11 @@
-// admin/dashboard.js
+// routes/admin/dashboard.js
 import express from 'express';
 import { pool } from '../../config/database.js';
 
 const router = express.Router();
 
-// GET /admin - Dashboard principal
 router.get('/', async (req, res) => {
     try {
-        // KPIs básicos
         const kpisQuery = `
             SELECT 
                 (SELECT COUNT(*) FROM products WHERE is_active = true) as total_products,
@@ -17,17 +15,38 @@ router.get('/', async (req, res) => {
                 (SELECT COUNT(*) FROM orders WHERE status IN ('Pendiente', 'Procesando')) as pending_orders,
                 (SELECT COUNT(*) FROM customers) as total_customers
         `;
-        
-        // Productos con stock bajo
+
+        // 🔧 Low stock corregido: si tiene variantes, usar SUM(variant.stock); si no, usar p.stock
         const lowStockQuery = `
-            SELECT product_id, product_name, stock, price
-            FROM products
-            WHERE stock < 5 AND is_active = true
-            ORDER BY stock ASC
+            WITH product_stock AS (
+                SELECT
+                    p.product_id,
+                    p.product_name,
+                    p.price,
+                    CASE
+                        WHEN EXISTS (
+                            SELECT 1
+                            FROM product_variants v
+                            WHERE v.product_id = p.product_id
+                              AND v.is_active = true
+                        ) THEN (
+                            SELECT COALESCE(SUM(v2.stock), 0)
+                            FROM product_variants v2
+                            WHERE v2.product_id = p.product_id
+                              AND v2.is_active = true
+                        )
+                        ELSE p.stock
+                    END AS total_stock
+                FROM products p
+                WHERE p.is_active = true
+            )
+            SELECT product_id, product_name, total_stock, price
+            FROM product_stock
+            WHERE total_stock < 5
+            ORDER BY total_stock ASC
             LIMIT 5
         `;
-        
-        // Órdenes recientes
+
         const recentOrdersQuery = `
             SELECT o.order_id, o.order_date, o.total, o.status,
                    c.first_name || ' ' || c.last_name as customer_name
@@ -36,8 +55,8 @@ router.get('/', async (req, res) => {
             ORDER BY o.order_date DESC
             LIMIT 5
         `;
-        
-        // FIX: Run all independent queries concurrently
+
+        // Ejecutar en paralelo
         const [kpisResult, lowStockResult, recentOrdersResult] = await Promise.all([
             pool.query(kpisQuery),
             pool.query(lowStockQuery),
@@ -45,14 +64,16 @@ router.get('/', async (req, res) => {
         ]);
 
         const kpis = kpisResult.rows[0];
-        
+
         res.render('admin/pages/dashboard', {
             title: 'Dashboard Admin - Artesanías Sunset',
+            pageCSS: '/css/admin.css',
+            pageJS: ['/js/admin.js'],
             kpis: kpis,
             lowStockProducts: lowStockResult.rows,
             recentOrders: recentOrdersResult.rows
         });
-        
+
     } catch (error) {
         console.error('Error en dashboard admin:', error);
         res.status(500).render('pages/500', {

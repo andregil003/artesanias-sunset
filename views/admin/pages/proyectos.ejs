@@ -1,0 +1,26 @@
+<main class="dashboard-container">
+    <h2>Dashboard de Proyectos Personales</h2>
+    <p>
+        Esta página se sirve desde <strong>localhost:3000</strong>.
+        <br>
+        Los proyectos de abajo están siendo servidos por un servidor estático en <strong>localhost:3001</strong>.
+    </p>
+
+    <div class="proyectos-lista">
+        <% if (proyectos && proyectos.length > 0) { %>
+            <ul class="lista-items">
+                <% proyectos.forEach(proyecto => { %>
+                    <li class="item-proyecto">
+                        <span class="proyecto-nombre"><%= proyecto.nombre %></span>
+
+                        <a href="<%= proyecto.url %>" target="_blank" class="btn-visitar">
+                            Visitar Proyecto
+                        </a>
+                    </li>
+                <% }) %>
+            </ul>
+        <% } else { %>
+            <p>No se encontraron proyectos para mostrar.</p>
+        <% } %>
+    </div>
+</main>

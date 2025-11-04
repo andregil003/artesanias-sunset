@@ -1,4 +1,4 @@
-// app.js - CON EXPRESS-EJS-LAYOUTS
+// app.js 
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -21,6 +21,7 @@ import cartRoutes from './routes/cart.js';
 import analyticsRoutes from './routes/analytics.js';
 import adminDashboardRoutes from './routes/admin/dashboard.js';
 import adminProductsRoutes from './routes/admin/products.js';
+import adminProyectosRoutes from './routes/admin/proyectos.js';
 import authRoutes from './routes/auth.js';
 import { isAdmin } from './middleware/auth.js';
 import { icons } from './config/icons.js';
@@ -47,8 +48,8 @@ app.set('layout extractStyles', true);
 // ========================================
 app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json({ limit: '250kb' }));
-app.use(express.urlencoded({ limit: '250kb', extended: true }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ limit: '1mb', extended: true }));
 
 // ========================================
 // SESIONES
@@ -76,22 +77,23 @@ app.use(passport.session());
 // MIDDLEWARE GLOBAL
 // ========================================
 app.use((req, res, next) => {
+    // Asignar valores básicos
     res.locals.icons = icons;
     res.locals.currentPath = req.path;
     res.locals.appName = process.env.APP_NAME || 'Artesanías Sunset';
-    res.locals.user = req.user || null;
     res.locals.contactEmail = process.env.CONTACT_EMAIL || 'info@artesaniassunset.com';
     res.locals.whatsappNumber = process.env.WHATSAPP_NUMBER || '50241298574';
     
-    // FIX: Comprueba req.user.is_admin directamente. No se necesita consulta a la BD.
-    // deserializeUser ya cargó esta información.
-    if (req.isAuthenticated()) {
+    // Asignar user e isAdmin basado en autenticación
+    if (req.isAuthenticated() && req.user) {
+        res.locals.user = req.user;
         res.locals.isAdmin = req.user.is_admin || false;
-        // Almacena en caché en la sesión para el middleware 'isAdmin'
         req.session.isAdmin = res.locals.isAdmin;
     } else {
+        res.locals.user = null;
         res.locals.isAdmin = false;
     }
+    
     next();
 });
 
@@ -105,6 +107,7 @@ app.use('/cart', cartRoutes);
 app.use('/analytics', isAdmin, analyticsRoutes);
 app.use('/admin', isAdmin, adminDashboardRoutes);
 app.use('/admin/products', isAdmin, adminProductsRoutes);
+app.use('/admin/proyectos', isAdmin, adminProyectosRoutes);
 
 // ========================================
 // MANEJO DE ERRORES
@@ -112,7 +115,6 @@ app.use('/admin/products', isAdmin, adminProductsRoutes);
 app.use((req, res) => {
     res.status(404).render('pages/404', { 
         title: 'Página no encontrada',
-        layout: 'layouts/main'
     });
 });
 
@@ -121,7 +123,6 @@ app.use((err, req, res, next) => {
     res.status(500).render('pages/500', {
         title: 'Error del servidor',
         error: process.env.NODE_ENV === 'development' ? err : {},
-        layout: 'layouts/main'
     });
 });
 

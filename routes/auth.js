@@ -1,4 +1,4 @@
-// routes/auth.js
+// routes/auth.js - OPTIMIZADO
 import express from 'express';
 import bcrypt from 'bcrypt';
 import passport from 'passport';
@@ -93,7 +93,7 @@ router.get('/login', (req, res) => {
 });
 
 router.post('/login', (req, res, next) => {
-    passport.authenticate('local', (err, user, info) => {
+    passport.authenticate('local', async (err, user, info) => {
         if (err) {
             console.error('Error en login:', err);
             return res.redirect('/auth/login?error=Error del servidor');
@@ -103,13 +103,22 @@ router.post('/login', (req, res, next) => {
             return res.redirect(`/auth/login?error=${encodeURIComponent(info.message || 'Error de autenticación')}`);
         }
         
-        // FIX: Removed redundant DB call for last_login (handled by passport strategy)
-        req.logIn(user, (err) => {
+        req.logIn(user, async (err) => {
             if (err) {
                 console.error('Error al crear sesión:', err);
                 return res.redirect('/auth/login?error=Error al crear sesión');
             }
-            res.redirect('/');
+            
+            try {
+                await pool.query(
+                    'UPDATE customers SET last_login = CURRENT_TIMESTAMP WHERE customer_id = $1',
+                    [user.customer_id]
+                );
+                res.redirect('/');
+            } catch (error) {
+                console.error('Error actualizando last_login:', error);
+                res.redirect('/');
+            }
         });
     })(req, res, next);
 });
@@ -162,7 +171,7 @@ router.post('/register', async (req, res) => {
         const result = await pool.query(
             `INSERT INTO customers (first_name, last_name, email, password_hash, phone, created_at)
              VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
-             RETURNING customer_id, email, first_name, last_name, is_admin`, // Added is_admin for deserializeUser
+             RETURNING customer_id, email, first_name, last_name`,
             [first_name, last_name, email, passwordHash, phone || null]
         );
         
@@ -190,33 +199,32 @@ router.get('/logout', (req, res) => {
     });
 });
 
-// FIX: Refactored to use Promise.all for concurrent queries
 router.get('/profile', isAuthenticated, async (req, res) => {
     try {
-        const [userResult, ordersResult, recentOrdersResult] = await Promise.all([
-            pool.query(
-                `SELECT c.customer_id, c.first_name, c.last_name, c.email, c.phone, c.created_at, c.last_login,
-                        ci.city_name, co.country_name
-                 FROM customers c
-                 LEFT JOIN cities ci ON c.city_id = ci.city_id
-                 LEFT JOIN countries co ON ci.country_id = co.country_id
-                 WHERE c.customer_id = $1`,
-                [req.user.customer_id]
-            ),
-            pool.query(
-                `SELECT COUNT(*) as total_orders, COALESCE(SUM(total), 0) as total_spent
-                 FROM orders
-                 WHERE customer_id = $1 AND status != 'Cancelado'`,
-                [req.user.customer_id]
-            ),
-            pool.query(
-                `SELECT order_id, order_date, total, status, currency_code
-                 FROM orders
-                 WHERE customer_id = $1
-                 ORDER BY order_date DESC LIMIT 5`,
-                [req.user.customer_id]
-            )
-        ]);
+        const userResult = await pool.query(
+            `SELECT c.customer_id, c.first_name, c.last_name, c.email, c.phone, c.created_at, c.last_login,
+                    ci.city_name, co.country_name
+             FROM customers c
+             LEFT JOIN cities ci ON c.city_id = ci.city_id
+             LEFT JOIN countries co ON ci.country_id = co.country_id
+             WHERE c.customer_id = $1`,
+            [req.user.customer_id]
+        );
+        
+        const ordersResult = await pool.query(
+            `SELECT COUNT(*) as total_orders, COALESCE(SUM(total), 0) as total_spent
+             FROM orders
+             WHERE customer_id = $1 AND status != 'Cancelado'`,
+            [req.user.customer_id]
+        );
+        
+        const recentOrdersResult = await pool.query(
+            `SELECT order_id, order_date, total, status, currency_code
+             FROM orders
+             WHERE customer_id = $1
+             ORDER BY order_date DESC LIMIT 5`,
+            [req.user.customer_id]
+        );
         
         res.render('pages/profile', {
             title: 'Mi Perfil - Artesanías Sunset',
@@ -321,21 +329,22 @@ router.post('/forgot-password', async (req, res) => {
             [email]
         );
         
-        // Timing attack mitigation: always return the same message
-        if (userResult.rows.length > 0) {
-            const user = userResult.rows[0];
-            const token = crypto.randomBytes(32).toString('hex');
-            const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-            
-            await pool.query(
-                'INSERT INTO password_reset_tokens (customer_id, token, expires_at, created_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP)',
-                [user.customer_id, token, expiresAt]
-            );
-            
-            const resetLink = `${process.env.BASE_URL || 'http://localhost:3000'}/auth/reset-password/${token}`;
-            
-            await sendPasswordResetEmail(user.email, user.first_name, resetLink);
+        if (userResult.rows.length === 0) {
+            return res.redirect('/auth/forgot-password?message=Si el email existe, recibirás un enlace de recuperación');
         }
+        
+        const user = userResult.rows[0];
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+        
+        await pool.query(
+            'INSERT INTO password_reset_tokens (customer_id, token, expires_at, created_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP)',
+            [user.customer_id, token, expiresAt]
+        );
+        
+        const resetLink = `${process.env.BASE_URL || 'http://localhost:3000'}/auth/reset-password/${token}`;
+        
+        await sendPasswordResetEmail(user.email, user.first_name, resetLink);
         
         res.redirect('/auth/forgot-password?message=Si el email existe, recibirás un enlace de recuperación');
     } catch (error) {
@@ -391,9 +400,8 @@ router.post('/reset-password/:token', async (req, res) => {
         
         await client.query('BEGIN');
         
-        // Check token validity again inside the transaction
         const tokenResult = await client.query(
-            'SELECT customer_id, expires_at FROM password_reset_tokens WHERE token = $1 AND used = FALSE FOR UPDATE',
+            'SELECT customer_id, expires_at FROM password_reset_tokens WHERE token = $1 AND used = FALSE',
             [token]
         );
         
