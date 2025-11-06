@@ -1,356 +1,274 @@
 <!-- public/views/admin/pages/products-form.ejs -->
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+<header class="admin-header">
+    <div class="header-left">
+        <h1 class="page-title"><%= isEdit ? 'Editar Producto' : 'Nuevo Producto' %></h1>
+    </div>
+    <div class="header-right">
+        <a href="/admin/products" class="btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Volver a productos
+        </a>
+    </div>
+</header>
+
+<main class="admin-content">
     
-    <!-- CSS Base -->
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/admin.css">
-    
-    <!-- Cropper.js CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
-    
-    <!-- jQuery -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-</head>
-<body class="admin-body">
-    
-    <!-- Sidebar -->
-    <aside class="admin-sidebar">
-        <div class="sidebar-header">
-            <h2>🌅</h2>
-            <p>Artesanías Sunset</p>
-        </div>
-        
-        <nav class="sidebar-nav">
-            <a href="/admin" class="nav-item">
-                <span class="nav-icon">📊</span>
-                <span class="nav-text">Dashboard</span>
-            </a>
+    <div class="form-container">
+        <form id="product-form" method="POST" action="<%= isEdit ? `/admin/products/${product.product_id}?_method=PUT` : '/admin/products' %>">
             
-            <a href="/admin/products" class="nav-item active">
-                <span class="nav-icon">📦</span>
-                <span class="nav-text">Productos</span>
-            </a>
-            
-            <a href="/admin/categories" class="nav-item">
-                <span class="nav-icon">🏷️</span>
-                <span class="nav-text">Categorías</span>
-            </a>
-            
-            <a href="/admin/orders" class="nav-item">
-                <span class="nav-icon">🛒</span>
-                <span class="nav-text">Órdenes</span>
-            </a>
-            
-            <div class="nav-divider"></div>
-            
-            <a href="/analytics" class="nav-item">
-                <span class="nav-icon">📈</span>
-                <span class="nav-text">Analíticas</span>
-            </a>
-            
-            <a href="/" class="nav-item">
-                <span class="nav-icon">🏠</span>
-                <span class="nav-text">Ver Tienda</span>
-            </a>
-        </nav>
-    </aside>
-    
-    <!-- Main Content -->
-    <div class="admin-main">
-        <!-- Header -->
-        <header class="admin-header">
-            <div class="header-left">
-                <h1 class="page-title"><%= isEdit ? 'Editar Producto' : 'Nuevo Producto' %></h1>
-            </div>
-            <div class="header-right">
-                <a href="/admin/products" class="btn-secondary">← Volver a productos</a>
-            </div>
-        </header>
-        
-        <!-- Content Area -->
-        <main class="admin-content">
-            
-            <!-- Formulario -->
-            <div class="form-container">
-                <form id="product-form" method="POST" action="<%= isEdit ? `/admin/products/${product.product_id}?_method=PUT` : '/admin/products' %>">
+            <div class="form-section">
+                <h3 class="section-title">Información Básica</h3>
+                
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="product_name">Nombre del Producto *</label>
+                        <input 
+                            type="text" 
+                            id="product_name" 
+                            name="product_name" 
+                            value="<%= product ? product.product_name : '' %>"
+                            required
+                            class="form-input"
+                            placeholder="Ej: Huipil Tradicional de Chichicastenango"
+                        >
+                    </div>
                     
-                    <!-- Información básica -->
-                    <div class="form-section">
-                        <h3 class="section-title">Información Básica</h3>
+                    <div class="form-group">
+                        <label for="category_id">Categoría *</label>
+                        <select id="category_id" name="category_id" required class="form-select">
+                            <option value="">Selecciona una categoría</option>
+                            <% categories.forEach(cat => { %>
+                                <option 
+                                    value="<%= cat.category_id %>" 
+                                    <%= product && product.category_id === cat.category_id ? 'selected' : '' %>
+                                >
+                                    <%= cat.category_name %>
+                                </option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="price">Precio (Q) *</label>
+                        <input 
+                            type="number" 
+                            id="price" 
+                            name="price" 
+                            value="<%= product ? product.price : '' %>"
+                            step="0.01"
+                            min="0"
+                            required
+                            class="form-input"
+                            placeholder="0.00"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="stock">Stock</label>
+                        <input 
+                            type="number" 
+                            id="stock" 
+                            name="stock" 
+                            value="<%= product ? product.stock : 0 %>"
+                            min="0"
+                            class="form-input"
+                            placeholder="0"
+                        >
+                        <small class="form-help">Dejar en 0 si el producto tiene variantes</small>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="description">Descripción</label>
+                        <textarea 
+                            id="description" 
+                            name="description" 
+                            rows="5"
+                            class="form-textarea"
+                            placeholder="Descripción detallada del producto..."
+                        ><%= product ? product.description : '' %></textarea>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="temp_image_url">Imagen del Producto</label>
                         
-                        <div class="form-grid">
-                            <div class="form-group full-width">
-                                <label for="product_name">Nombre del Producto *</label>
-                                <input 
-                                    type="text" 
-                                    id="product_name" 
-                                    name="product_name" 
-                                    value="<%= product ? product.product_name : '' %>"
-                                    required
-                                    class="form-input"
-                                    placeholder="Ej: Huipil Tradicional de Chichicastenango"
+                        <input type="hidden" id="image_url" name="image_url" value="">
+                        
+                        <input 
+                            type="url" 
+                            id="temp_image_url" 
+                            class="form-input" 
+                            placeholder="Pega la URL de una imagen aquí..."
+                            style="margin-bottom: 8px;"
+                        >
+                        <small class="form-help">
+                            Formatos: JPG, PNG, WEBP, GIF - La imagen se cargará automáticamente
+                        </small>
+                        
+                        <div id="current-preview-container" style="margin-top: 20px; display: none;">
+                            <p style="display: block; margin-bottom: 8px; font-weight: 600;">Imagen actual:</p>
+                            <div class="current-image-wrapper">
+                                <img 
+                                    id="current-image" 
+                                    src="" 
+                                    alt="Imagen actual" 
+                                    style="max-width: 400px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: block; margin-bottom: 12px;"
                                 >
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="category_id">Categoría *</label>
-                                <select id="category_id" name="category_id" required class="form-select">
-                                    <option value="">Selecciona una categoría</option>
-                                    <% categories.forEach(cat => { %>
-                                        <option 
-                                            value="<%= cat.category_id %>" 
-                                            <%= product && product.category_id === cat.category_id ? 'selected' : '' %>
-                                        >
-                                            <%= cat.category_name %>
-                                        </option>
-                                    <% }); %>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="price">Precio (Q) *</label>
-                                <input 
-                                    type="number" 
-                                    id="price" 
-                                    name="price" 
-                                    value="<%= product ? product.price : '' %>"
-                                    step="0.01"
-                                    min="0"
-                                    required
-                                    class="form-input"
-                                    placeholder="0.00"
-                                >
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="stock">Stock</label>
-                                <input 
-                                    type="number" 
-                                    id="stock" 
-                                    name="stock" 
-                                    value="<%= product ? product.stock : 0 %>"
-                                    min="0"
-                                    class="form-input"
-                                    placeholder="0"
-                                >
-                                <small class="form-help">Dejar en 0 si el producto tiene variantes</small>
-                            </div>
-                            
-                            <div class="form-group full-width">
-                                <label for="description">Descripción</label>
-                                <textarea 
-                                    id="description" 
-                                    name="description" 
-                                    rows="5"
-                                    class="form-textarea"
-                                    placeholder="Descripción detallada del producto..."
-                                ><%= product ? product.description : '' %></textarea>
-                            </div>
-                            
-                            <!-- SECCIÓN DE IMAGEN - PREVIEW AUTOMÁTICO -->
-                            <div class="form-group full-width">
-                                <label for="temp_image_url">Imagen del Producto</label>
-                                
-                                <!-- Input oculto para guardar la URL final -->
-                                <input type="hidden" id="image_url" name="image_url" value="">
-                                
-                                <!-- Input para pegar URL -->
-                                <input 
-                                    type="url" 
-                                    id="temp_image_url" 
-                                    class="form-input" 
-                                    placeholder="Pega la URL de una imagen aquí... (se cargará automáticamente)"
-                                    style="margin-bottom: 8px;"
-                                >
-                                <small class="form-help">
-                                    Formatos: JPG, PNG, WEBP, GIF - La imagen se cargará automáticamente
-                                </small>
-                                
-                                <!-- Vista previa actual -->
-                                <div id="current-preview-container" style="margin-top: 20px; display: none;">
-                                    <p style="display: block; margin-bottom: 8px; font-weight: 600;">Imagen actual:</p>
-                                    <div class="current-image-wrapper">
-                                        <img 
-                                            id="current-image" 
-                                            src="" 
-                                            alt="Imagen actual" 
-                                            style="max-width: 400px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: block; margin-bottom: 12px;"
-                                        >
-                                        <div style="display: flex; gap: 10px;">
-                                            <button type="button" id="btn-edit-image" class="btn-primary btn-small">
-                                                ✂️ Editar Imagen
-                                            </button>
-                                            <button type="button" id="btn-remove-image" class="btn-danger btn-small">
-                                                🗑️ Eliminar
-                                            </button>
-                                        </div>
-                                    </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <button type="button" id="btn-edit-image" class="btn-primary btn-small">
+                                        <i class="fa-solid fa-crop-simple"></i> Editar Imagen
+                                    </button>
+                                    <button type="button" id="btn-remove-image" class="btn-danger btn-small">
+                                        <i class="fa-solid fa-trash"></i> Eliminar
+                                    </button>
                                 </div>
-                                
-                                <% if (product && product.image_url) { %>
-                                <script>
-                                // Cargar imagen existente al editar
-                                $(document).ready(function() {
-                                    const existingUrl = '<%= product.image_url %>';
-                                    if (existingUrl) {
-                                        $('#image_url').val(existingUrl);
-                                        $('#current-image').attr('src', existingUrl);
-                                        $('#current-preview-container').show();
-                                    }
-                                });
-                                </script>
-                                <% } %>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Estado -->
-                    <div class="form-section">
-                        <h3 class="section-title">Estado del Producto</h3>
                         
-                        <div class="form-group">
-                            <label class="checkbox-label">
-                                <input 
-                                    type="checkbox" 
-                                    id="is_active"
-                                    name="is_active" 
-                                    value="true"
-                                    <%= !product || product.is_active ? 'checked' : '' %>
-                                    class="form-checkbox"
-                                >
-                                <span>Producto activo (visible en la tienda)</span>
-                            </label>
-                        </div>
+                        <% if (product && product.image_url) { %>
+                        <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const existingUrl = '<%= product.image_url %>';
+                            if (existingUrl) {
+                                document.getElementById('image_url').value = existingUrl;
+                                document.getElementById('current-image').src = existingUrl;
+                                document.getElementById('current-preview-container').style.display = 'block';
+                            }
+                        });
+                        </script>
+                        <% } %>
                     </div>
-                    
-                    <!-- Botones -->
-                    <div class="form-actions">
-                        <button type="submit" class="btn-primary btn-large">
-                            <%= isEdit ? '💾 Guardar Cambios' : '➕ Crear Producto' %>
-                        </button>
-                        <a href="/admin/products" class="btn-secondary btn-large">
-                            Cancelar
-                        </a>
-                    </div>
-                    
-                </form>
+                </div>
             </div>
             
-        </main>
+            <div class="form-section">
+                <h3 class="section-title">Estado del Producto</h3>
+                
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input 
+                            type="checkbox" 
+                            id="is_active"
+                            name="is_active" 
+                            value="true"
+                            <%= !product || product.is_active ? 'checked' : '' %>
+                            class="form-checkbox"
+                        >
+                        <span>Producto activo (visible en la tienda)</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary btn-large">
+                    <% if (isEdit) { %>
+                        <i class="fa-solid fa-save"></i> Guardar Cambios
+                    <% } else { %>
+                        <i class="fa-solid fa-plus"></i> Crear Producto
+                    <% } %>
+                </button>
+                <a href="/admin/products" class="btn-secondary btn-large">
+                    Cancelar
+                </a>
+            </div>
+            
+        </form>
     </div>
     
-    <!-- MODAL EDITOR DE IMAGEN -->
-    <div id="image-editor-modal" class="modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h3>✂️ Editar Imagen del Producto</h3>
-                <button type="button" class="modal-close">&times;</button>
-            </div>
-            
-            <div class="modal-body">
-                <div class="editor-container">
-                    <!-- Columna izquierda: Editor -->
-                    <div class="editor-column">
-                        <h4>Ajustar encuadre</h4>
-                        <div class="cropper-wrapper">
-                            <img id="crop-image" src="" alt="Imagen para recortar">
+</main>
+
+<div id="image-editor-modal" class="modal">
+    <div class="modal-content modal-large">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-crop-simple"></i> Editar Imagen del Producto</h3>
+            <button type="button" class="modal-close" aria-label="Cerrar">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="editor-container">
+                <div class="editor-column">
+                    <h4>Ajustar encuadre</h4>
+                    <div class="cropper-wrapper">
+                        <img id="crop-image" src="" alt="Imagen para recortar">
+                    </div>
+                    
+                    <div class="editor-controls">
+                        <div class="controls-row">
+                            <button type="button" class="btn-control" data-action="rotate-left" title="Rotar izquierda">
+                                <i class="fa-solid fa-rotate-left"></i>
+                            </button>
+                            <button type="button" class="btn-control" data-action="rotate-right" title="Rotar derecha">
+                                <i class="fa-solid fa-rotate-right"></i>
+                            </button>
+                            <button type="button" class="btn-control" data-action="flip-horizontal" title="Voltear horizontal">
+                                <i class="fa-solid fa-arrows-left-right"></i>
+                            </button>
+                            <button type="button" class="btn-control" data-action="flip-vertical" title="Voltear vertical">
+                                <i class="fa-solid fa-arrows-up-down"></i>
+                            </button>
                         </div>
-                        
-                        <!-- Controles del editor -->
-                        <div class="editor-controls">
-                            <!-- Primera fila: 4 botones -->
-                            <div class="controls-row">
-                                <button type="button" class="btn-control" data-action="rotate-left" title="Rotar izquierda">
-                                    ↶
-                                </button>
-                                <button type="button" class="btn-control" data-action="rotate-right" title="Rotar derecha">
-                                    ↷
-                                </button>
-                                <button type="button" class="btn-control" data-action="flip-horizontal" title="Voltear horizontal">
-                                    ↔️
-                                </button>
-                                <button type="button" class="btn-control" data-action="flip-vertical" title="Voltear vertical">
-                                    ↕️
-                                </button>
-                            </div>
-                            
-                            <!-- Segunda fila: 3 botones -->
-                            <div class="controls-row">
-                                <button type="button" class="btn-control" data-action="zoom-in" title="Acercar">
-                                    🔍+
-                                </button>
-                                <button type="button" class="btn-control" data-action="zoom-out" title="Alejar">
-                                    🔍-
-                                </button>
-                                <button type="button" class="btn-control" data-action="reset" title="Reiniciar">
-                                    🔄
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Selector de aspect ratio -->
-                        <div class="aspect-ratio-selector">
-                            <label>Proporción:</label>
-                            <button type="button" class="btn-ratio active" data-ratio="1">Cuadrado (1:1)</button>
-                            <button type="button" class="btn-ratio" data-ratio="1.33">4:3</button>
-                            <button type="button" class="btn-ratio" data-ratio="1.77">16:9</button>
-                            <button type="button" class="btn-ratio" data-ratio="0">Libre</button>
+                        <div class="controls-row">
+                            <button type="button" class="btn-control" data-action="zoom-in" title="Acercar">
+                                <i class="fa-solid fa-search-plus"></i>
+                            </button>
+                            <button type="button" class="btn-control" data-action="zoom-out" title="Alejar">
+                                <i class="fa-solid fa-search-minus"></i>
+                            </button>
+                            <button type="button" class="btn-control" data-action="reset" title="Reiniciar">
+                                <i class="fa-solid fa-rotate"></i>
+                            </button>
                         </div>
                     </div>
                     
-                    <!-- Columna derecha: Vistas previas -->
-                    <div class="preview-column">
-                        <h4>Vista previa del catálogo</h4>
-                        
-                        <!-- Preview tarjeta de producto -->
-                        <div class="preview-card">
-                            <label>📱 Móvil - Tarjeta de producto</label>
-                            <div class="product-card-preview mobile">
-                                <div class="preview-image-container">
-                                    <img id="preview-mobile" src="" alt="Preview móvil">
-                                </div>
-                                <div class="preview-info">
-                                    <h5>Nombre del Producto</h5>
-                                    <p class="preview-price">Q 150.00</p>
-                                </div>
+                    <div class="aspect-ratio-selector">
+                        <span class="ratio-label">Proporción:</span>
+                        <button type="button" class="btn-ratio active" data-ratio="1">Cuadrado (1:1)</button>
+                        <button type="button" class="btn-ratio" data-ratio="1.33">4:3</button>
+                        <button type="button" class="btn-ratio" data-ratio="1.77">16:9</button>
+                        <button type="button" class="btn-ratio" data-ratio="0">Libre</button>
+                    </div>
+                </div>
+                
+                <div class="preview-column">
+                    <h4>Vista previa del catálogo</h4>
+                    
+                    <div class="preview-card">
+                        <span class="preview-card-label"><i class="fa-solid fa-mobile-screen"></i> Móvil</span>
+                        <div class="product-card-preview mobile">
+                            <div class="preview-image-container">
+                                <img id="preview-mobile" src="" alt="Preview móvil">
+                            </div>
+                            <div class="preview-info">
+                                <h5>Nombre del Producto</h5>
+                                <p class="preview-price">Q 150.00</p>
                             </div>
                         </div>
-                        
-                        <div class="preview-card">
-                            <label>💻 Desktop - Tarjeta de producto</label>
-                            <div class="product-card-preview desktop">
-                                <div class="preview-image-container">
-                                    <img id="preview-desktop" src="" alt="Preview desktop">
-                                </div>
-                                <div class="preview-info">
-                                    <h5>Nombre del Producto</h5>
-                                    <p class="preview-price">Q 150.00</p>
-                                </div>
+                    </div>
+                    
+                    <div class="preview-card">
+                        <span class="preview-card-label"><i class="fa-solid fa-desktop"></i> Desktop</span>
+                        <div class="product-card-preview desktop">
+                            <div class="preview-image-container">
+                                <img id="preview-desktop" src="" alt="Preview desktop">
+                            </div>
+                            <div class="preview-info">
+                                <h5>Nombre del Producto</h5>
+                                <p class="preview-price">Q 150.00</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="modal-footer">
-                <button type="button" id="btn-cancel-crop" class="btn-secondary btn-large">
-                    Cancelar
-                </button>
-                <button type="button" id="btn-apply-crop" class="btn-primary btn-large">
-                    ✅ Aplicar y Guardar
-                </button>
-            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button type="button" id="btn-cancel-crop" class="btn-secondary btn-large">
+                Cancelar
+            </button>
+            <button type="button" id="btn-apply-crop" class="btn-primary btn-large">
+                <i class="fa-solid fa-check"></i> Aplicar y Guardar
+            </button>
         </div>
     </div>
-    
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-    <script src="/js/admin.js"></script>
-    <script src="/js/admin-products-form.js"></script>
-</body>
-</html>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+<script src="/js/admin-products-form.js"></script>

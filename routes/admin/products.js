@@ -144,6 +144,8 @@ router.get('/', async (req, res) => {
         );
         
         res.render('admin/pages/products-list', {
+            layout: 'admin/layout', // <-- AÑADIDO
+            page: 'products',       // <-- AÑADIDO
             title: 'Productos - Admin',
             pageCSS: '/css/admin.css',
             pageJS: ['/js/admin-products.js'],
@@ -164,6 +166,8 @@ router.get('/', async (req, res) => {
     } catch (error) {
         console.error('Error al obtener productos:', error);
         res.status(500).render('admin/pages/products-list', {
+            layout: 'admin/layout', // <-- AÑADIDO (para que el error se muestre en el layout de admin)
+            page: 'products',       // <-- AÑADIDO
             title: 'Productos - Admin',
             pageCSS: '/css/admin.css',
             products: [],
@@ -182,6 +186,8 @@ router.get('/new', async (req, res) => {
         );
         
         res.render('admin/pages/products-form', {
+            layout: 'admin/layout', // <-- AÑADIDO
+            page: 'products',       // <-- AÑADIDO
             title: 'Nuevo Producto - Admin',
             pageCSS: '/css/admin.css',
             pageJS: ['/js/admin-products-form.js'],
@@ -217,6 +223,8 @@ router.get('/:id/edit', async (req, res) => {
         );
         
         res.render('admin/pages/products-form', {
+            layout: 'admin/layout', // <-- AÑADIDO
+            page: 'products',       // <-- AÑADIDO
             title: 'Editar Producto - Admin',
             pageCSS: '/css/admin.css',
             pageJS: ['/js/admin-products-form.js'],
@@ -229,6 +237,8 @@ router.get('/:id/edit', async (req, res) => {
         res.status(500).send('Error al cargar producto');
     }
 });
+
+// ... (Las rutas POST, PUT, DELETE no se modifican ya que devuelven JSON) ...
 
 router.post('/', async (req, res) => {
     try {

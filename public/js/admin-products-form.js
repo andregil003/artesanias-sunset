@@ -7,11 +7,13 @@ $(document).ready(function() {
     const $form = $('#product-form');
     const isEdit = window.location.pathname.includes('/edit');
     
+    // Envío del formulario
     $form.on('submit', function(e) {
         e.preventDefault();
         isEdit ? updateProduct() : createProduct();
     });
     
+    // Detección de URL de imagen
     $('#temp_image_url').on('input', function() {
         clearTimeout(typingTimer);
         const url = $(this).val().trim();
@@ -22,16 +24,17 @@ $(document).ready(function() {
         }
         
         typingTimer = setTimeout(() => {
-            if (isValidImageUrl(url)) loadImagePreview(url);
-            else clearImagePreview();
+            loadImagePreview(url);
         }, TYPING_DELAY);
     });
     
+    // Botón editar imagen
     $('#btn-edit-image').on('click', function() {
         const url = $('#image_url').val();
         if (url) openEditor(url);
     });
     
+    // Botón eliminar imagen
     $('#btn-remove-image').on('click', function() {
         if (confirm('¿Eliminar imagen del producto?')) {
             clearImagePreview();
@@ -39,109 +42,216 @@ $(document).ready(function() {
         }
     });
     
+    // Cerrar modal
     $('.modal-close, #btn-cancel-crop').on('click', closeEditor);
     
+    // Cerrar modal al hacer clic fuera
     $('#image-editor-modal').on('click', function(e) {
-        if ($(e.target).is('#image-editor-modal')) closeEditor();
+        if ($(e.target).is('#image-editor-modal')) {
+            closeEditor();
+        }
     });
     
+    // Aplicar recorte
     $('#btn-apply-crop').on('click', applyCrop);
     
+    // Controles del editor
     $('.btn-control').on('click', function() {
         if (!cropperInstance) return;
         executeEditorAction($(this).data('action'));
     });
     
+    // Cambiar proporción de aspecto
     $('.btn-ratio').on('click', function() {
         if (!cropperInstance) return;
         
-        const ratio = parseFloat($(this).data('ratio'));
-        cropperInstance.setAspectRatio(ratio);
+        const $btn = $(this);
+        const ratio = parseFloat($btn.data('ratio'));
         
-        $('.btn-ratio').removeClass('active');
-        $(this).addClass('active');
+        try {
+            cropperInstance.setAspectRatio(ratio || NaN);
+            $('.btn-ratio').removeClass('active');
+            $btn.addClass('active');
+        } catch (e) {
+            console.error('Error al cambiar ratio:', e);
+        }
     });
 });
 
-function isValidImageUrl(url) {
-    if (!url) return false;
-    
-    try {
-        new URL(url);
-    } catch {
-        return false;
-    }
-    
-    const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
-    const urlLower = url.toLowerCase();
-    
-    return validExtensions.some(ext => urlLower.includes(ext));
-}
-
+// Cargar preview de imagen
 function loadImagePreview(url) {
+    if (!url) return;
+    
+    // Mostrar loading
+    showToast('Cargando imagen...', 'info');
+    
+    // Intentar cargar directamente
     const img = new Image();
     
     img.onload = function() {
-        $('#image_url').val(url);
-        $('#current-image').attr('src', url);
+        $('.admin-toast').remove();
+        
+        // Convertir a base64 si es necesario
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            
+            try {
+                const base64 = canvas.toDataURL('image/jpeg', 0.9);
+                $('#image_url').val(base64);
+                $('#current-image').attr('src', base64);
+            } catch (e) {
+                // Si falla CORS, usar URL directa
+                $('#image_url').val(url);
+                $('#current-image').attr('src', url);
+            }
+        } else {
+            $('#image_url').val(url);
+            $('#current-image').attr('src', url);
+        }
+        
         $('#current-preview-container').fadeIn(300);
     };
     
-    img.onerror = clearImagePreview;
+    img.onerror = function() {
+        $('.admin-toast').remove();
+        showToast('No se pudo cargar la imagen. Verifica la URL.', 'error');
+        clearImagePreview();
+    };
+    
+    img.crossOrigin = 'anonymous';
     img.src = url;
 }
 
+// Limpiar preview
 function clearImagePreview() {
     $('#image_url').val('');
     $('#current-image').attr('src', '');
     $('#current-preview-container').fadeOut(300);
 }
 
+// Abrir editor de imágenes
 function openEditor(url) {
-    $('#image-editor-modal').addClass('active');
-    
+    const $modal = $('#image-editor-modal');
     const $img = $('#crop-image');
+    
+    // Destruir instancia previa
+    destroyCropper();
+    
+    // Limpiar estado
+    $img.off('load error').attr('src', '');
+    
+    // Mostrar modal
+    $modal.addClass('active');
+    $('body').css('overflow', 'hidden');
+    
+    // Configurar carga de imagen
+    const loadHandler = function() {
+        $img.off('load error');
+        
+        setTimeout(() => {
+            try {
+                // Verificar que no exista instancia
+                if (cropperInstance) {
+                    destroyCropper();
+                }
+                
+                // Crear cropper
+                cropperInstance = new Cropper($img[0], {
+                    aspectRatio: 1,
+                    viewMode: 2,
+                    autoCropArea: 1,
+                    responsive: true,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: true,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                    minContainerWidth: 200,
+                    minContainerHeight: 200,
+                    checkCrossOrigin: false,
+                    ready: function() {
+                        updatePreviews();
+                    },
+                    crop: function() {
+                        updatePreviews();
+                    }
+                });
+            } catch (error) {
+                console.error('Error al inicializar Cropper:', error);
+                showToast('Error al cargar el editor de imágenes', 'error');
+                closeEditor();
+            }
+        }, 100);
+    };
+    
+    const errorHandler = function() {
+        $img.off('load error');
+        showToast('No se pudo cargar la imagen en el editor', 'error');
+        closeEditor();
+    };
+    
+    // Cargar imagen
+    $img.one('load', loadHandler);
+    $img.one('error', errorHandler);
     $img.attr('src', url);
-    
-    if (cropperInstance) {
-        cropperInstance.destroy();
-        cropperInstance = null;
-    }
-    
-    $img.on('load', function() {
-        cropperInstance = new Cropper($img[0], {
-            aspectRatio: 1,
-            viewMode: 2,
-            autoCropArea: 1,
-            responsive: true,
-            ready: updatePreviews,
-            crop: updatePreviews
-        });
-    });
 }
 
+// Destruir cropper completamente
+function destroyCropper() {
+    if (cropperInstance) {
+        try {
+            cropperInstance.destroy();
+        } catch (e) {
+            console.error('Error al destruir cropper:', e);
+        }
+        cropperInstance = null;
+    }
+}
+
+// Cerrar editor
 function closeEditor() {
-    $('#image-editor-modal').removeClass('active');
+    const $modal = $('#image-editor-modal');
     
-    if (cropperInstance) {
-        cropperInstance.destroy();
-        cropperInstance = null;
-    }
+    $modal.removeClass('active');
+    $('body').css('overflow', '');
     
-    $('#crop-image').attr('src', '');
+    setTimeout(() => {
+        destroyCropper();
+        
+        const $img = $('#crop-image');
+        $img.off('load error').attr('src', '');
+        
+        $('.btn-ratio').removeClass('active');
+        $('.btn-ratio[data-ratio="1"]').addClass('active');
+    }, 350);
 }
 
+// Aplicar recorte
 function applyCrop() {
-    if (!cropperInstance) return;
+    if (!cropperInstance) {
+        showToast('Error: Editor no inicializado', 'error');
+        return;
+    }
     
-    const canvas = cropperInstance.getCroppedCanvas({
-        width: 800,
-        height: 800,
-        imageSmoothingEnabled: true,
-        imageSmoothingQuality: 'high'
-    });
-    
-    if (canvas) {
+    try {
+        const canvas = cropperInstance.getCroppedCanvas({
+            width: 800,
+            height: 800,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high'
+        });
+        
+        if (!canvas) {
+            showToast('Error al procesar la imagen', 'error');
+            return;
+        }
+        
         const base64 = canvas.toDataURL('image/jpeg', 0.85);
         
         $('#image_url').val(base64);
@@ -149,42 +259,64 @@ function applyCrop() {
         $('#temp_image_url').val('');
         
         closeEditor();
-        showToast('Imagen editada correctamente (800x800px)', 'success');
+        showToast('Imagen editada correctamente', 'success');
+    } catch (error) {
+        console.error('Error al aplicar recorte:', error);
+        showToast('Error al procesar la imagen', 'error');
     }
 }
 
+// Actualizar previews
 function updatePreviews() {
     if (!cropperInstance) return;
     
-    const canvas = cropperInstance.getCroppedCanvas({
-        width: 600,
-        height: 600,
-        imageSmoothingEnabled: true,
-        imageSmoothingQuality: 'high'
-    });
-    
-    if (canvas) {
-        const url = canvas.toDataURL('image/jpeg', 0.85);
-        $('#preview-mobile, #preview-desktop').attr('src', url);
+    try {
+        const canvas = cropperInstance.getCroppedCanvas({
+            width: 400,
+            height: 400,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high'
+        });
+        
+        if (canvas) {
+            const url = canvas.toDataURL('image/jpeg', 0.85);
+            $('#preview-mobile, #preview-desktop').attr('src', url);
+        }
+    } catch (error) {
+        console.error('Error al actualizar previews:', error);
     }
 }
 
+// Ejecutar acciones del editor
 function executeEditorAction(action) {
     if (!cropperInstance) return;
     
-    const actions = {
-        'rotate-left': () => cropperInstance.rotate(-90),
-        'rotate-right': () => cropperInstance.rotate(90),
-        'flip-horizontal': () => cropperInstance.scaleX(-cropperInstance.getData().scaleX || -1),
-        'flip-vertical': () => cropperInstance.scaleY(-cropperInstance.getData().scaleY || -1),
-        'zoom-in': () => cropperInstance.zoom(0.1),
-        'zoom-out': () => cropperInstance.zoom(-0.1),
-        'reset': () => cropperInstance.reset()
-    };
-    
-    if (actions[action]) actions[action]();
+    try {
+        const actions = {
+            'rotate-left': () => cropperInstance.rotate(-90),
+            'rotate-right': () => cropperInstance.rotate(90),
+            'flip-horizontal': () => {
+                const scaleX = cropperInstance.getData().scaleX || 1;
+                cropperInstance.scaleX(-scaleX);
+            },
+            'flip-vertical': () => {
+                const scaleY = cropperInstance.getData().scaleY || 1;
+                cropperInstance.scaleY(-scaleY);
+            },
+            'zoom-in': () => cropperInstance.zoom(0.1),
+            'zoom-out': () => cropperInstance.zoom(-0.1),
+            'reset': () => cropperInstance.reset()
+        };
+        
+        if (actions[action]) {
+            actions[action]();
+        }
+    } catch (error) {
+        console.error('Error al ejecutar acción:', error);
+    }
 }
 
+// Crear producto
 function createProduct() {
     const $form = $('#product-form');
     disableForm($form);
@@ -194,7 +326,9 @@ function createProduct() {
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(getFormData()),
-        success: () => window.location.href = '/admin/products?success=created',
+        success: function() {
+            window.location.href = '/admin/products?success=created';
+        },
         error: function(xhr) {
             enableForm($form);
             showToast(xhr.responseJSON?.message || 'Error al crear producto', 'error');
@@ -202,6 +336,7 @@ function createProduct() {
     });
 }
 
+// Actualizar producto
 function updateProduct() {
     const $form = $('#product-form');
     const productId = window.location.pathname.match(/\/admin\/products\/(\d+)/)[1];
@@ -213,7 +348,9 @@ function updateProduct() {
         method: 'PUT',
         contentType: 'application/json',
         data: JSON.stringify(getFormData()),
-        success: () => window.location.href = '/admin/products?success=updated',
+        success: function() {
+            window.location.href = '/admin/products?success=updated';
+        },
         error: function(xhr) {
             enableForm($form);
             showToast(xhr.responseJSON?.message || 'Error al actualizar producto', 'error');
@@ -221,6 +358,7 @@ function updateProduct() {
     });
 }
 
+// Obtener datos del formulario
 function getFormData() {
     return {
         product_name: $('#product_name').val().trim(),
@@ -233,21 +371,32 @@ function getFormData() {
     };
 }
 
+// Deshabilitar formulario
 function disableForm($form) {
     $form.addClass('loading');
     $form.find('input, select, textarea, button').prop('disabled', true);
 }
 
+// Habilitar formulario
 function enableForm($form) {
     $form.removeClass('loading');
     $form.find('input, select, textarea, button').prop('disabled', false);
 }
 
+// Mostrar notificación
 function showToast(message, type = 'success') {
     $('.admin-toast').remove();
     
-    const icon = type === 'success' ? '✅' : '❌';
-    const toastClass = type === 'success' ? 'toast-success' : 'toast-error';
+    let icon = '✅';
+    let toastClass = 'toast-success';
+    
+    if (type === 'error') {
+        icon = '❌';
+        toastClass = 'toast-error';
+    } else if (type === 'info') {
+        icon = 'ℹ️';
+        toastClass = 'toast-info';
+    }
     
     const $toast = $(`
         <div class="admin-toast ${toastClass}">
@@ -258,8 +407,22 @@ function showToast(message, type = 'success') {
     
     $('body').append($toast);
     setTimeout(() => $toast.addClass('show'), 10);
-    setTimeout(() => {
-        $toast.removeClass('show');
-        setTimeout(() => $toast.remove(), 300);
-    }, 3000);
+    
+    if (type !== 'info') {
+        setTimeout(() => {
+            $toast.removeClass('show');
+            setTimeout(() => $toast.remove(), 300);
+        }, 3000);
+    }
 }
+
+// Redimensionar cropper en cambios de orientación
+$(window).on('resize orientationchange', function() {
+    if (cropperInstance) {
+        try {
+            cropperInstance.resize();
+        } catch (e) {
+            console.error('Error al redimensionar cropper:', e);
+        }
+    }
+});

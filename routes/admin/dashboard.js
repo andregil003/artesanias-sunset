@@ -16,7 +16,6 @@ router.get('/', async (req, res) => {
                 (SELECT COUNT(*) FROM customers) as total_customers
         `;
 
-        // 🔧 Low stock corregido: si tiene variantes, usar SUM(variant.stock); si no, usar p.stock
         const lowStockQuery = `
             WITH product_stock AS (
                 SELECT
@@ -66,6 +65,8 @@ router.get('/', async (req, res) => {
         const kpis = kpisResult.rows[0];
 
         res.render('admin/pages/dashboard', {
+            layout: 'admin/layout', // <-- AÑADIDO
+            page: 'dashboard',      // <-- AÑADIDO
             title: 'Dashboard Admin - Artesanías Sunset',
             pageCSS: '/css/admin.css',
             pageJS: ['/js/admin.js'],
@@ -77,6 +78,7 @@ router.get('/', async (req, res) => {
     } catch (error) {
         console.error('Error en dashboard admin:', error);
         res.status(500).render('pages/500', {
+            // Nota: El error 500 usa el layout principal (pages/500), lo cual está bien.
             title: 'Error del servidor',
             pageCSS: '/css/errors.css',
             error: process.env.NODE_ENV === 'development' ? error : {}

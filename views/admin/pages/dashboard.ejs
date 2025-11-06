@@ -1,227 +1,128 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
-    
-    <!-- CSS Base -->
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/admin.css">
-    
-    <!-- jQuery -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-</head>
-<body class="admin-body">
-    
-    <!-- Sidebar -->
-    <aside class="admin-sidebar">
-        <div class="sidebar-header">
-            <h2>🌅</h2>
+<!-- public/views/admin/pages/dashboard.ejs -->
+<header class="admin-header">
+    <div class="header-left">
+        <h1 class="page-title">Dashboard</h1>
+    </div>
+</header>
+
+<main class="admin-content">
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-icon"><i class="nav-icon <%= icons.catalogBag %>"></i></div>
+            <div class="kpi-info">
+                <h3 class="kpi-value"><%= kpis.total_products %></h3>
+                <p class="kpi-label">Productos Activos</p>
+            </div>
         </div>
         
-        <nav class="sidebar-nav">
-            <a href="/admin" class="nav-item active">
-                <span class="nav-icon">📊</span>
-                <span class="nav-text">Dashboard</span>
-            </a>
-            
-            <a href="/admin/products" class="nav-item">
-                <span class="nav-icon">📦</span>
-                <span class="nav-text">Productos</span>
-            </a>
-            
-            <a href="/admin/categories" class="nav-item">
-                <span class="nav-icon">🏷️</span>
-                <span class="nav-text">Categorías</span>
-            </a>
-            
-            <a href="/admin/orders" class="nav-item">
-                <span class="nav-icon">🛒</span>
-                <span class="nav-text">Órdenes</span>
-            </a>
-            
-            <div class="nav-divider"></div>
-            
-            <a href="/analytics" class="nav-item">
-                <span class="nav-icon">📈</span>
-                <span class="nav-text">Analíticas</span>
-            </a>
-            
-            <a href="/" class="nav-item">
-                <span class="nav-icon">🏠</span>
-                <span class="nav-text">Ver Tienda</span>
-            </a>
-        </nav>
-    </aside>
-    
-    <!-- Main Content -->
-    <div class="admin-main">
-        <!-- Header -->
-        <header class="admin-header">
-            <div class="header-left">
-                <h1 class="page-title">Dashboard</h1>
+        <div class="kpi-card">
+            <div class="kpi-icon"><i class="nav-icon fa-solid fa-tags"></i></div>
+            <div class="kpi-info">
+                <h3 class="kpi-value"><%= kpis.total_categories %></h3>
+                <p class="kpi-label">Categorías</p>
             </div>
-            <div class="header-right">
-                <span class="admin-user">👤 Administrador</span>
-            </div>
-        </header>
+        </div>
         
-        <!-- Content Area -->
-        <main class="admin-content">
-            <!-- KPIs Cards -->
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <div class="kpi-icon">📦</div>
-                    <div class="kpi-info">
-                        <h3 class="kpi-value"><%= kpis.total_products %></h3>
-                        <p class="kpi-label">Productos Activos</p>
-                    </div>
-                </div>
-                
-                <div class="kpi-card">
-                    <div class="kpi-icon">🏷️</div>
-                    <div class="kpi-info">
-                        <h3 class="kpi-value"><%= kpis.total_categories %></h3>
-                        <p class="kpi-label">Categorías</p>
-                    </div>
-                </div>
-                
-                <div class="kpi-card">
-                    <div class="kpi-icon">🛒</div>
-                    <div class="kpi-info">
-                        <h3 class="kpi-value"><%= kpis.total_orders %></h3>
-                        <p class="kpi-label">Órdenes Totales</p>
-                    </div>
-                </div>
-                
-                <div class="kpi-card">
-                    <div class="kpi-icon">💰</div>
-                    <div class="kpi-info">
-                        <h3 class="kpi-value">Q<%= parseFloat(kpis.total_revenue).toFixed(2) %></h3>
-                        <p class="kpi-label">Ingresos Totales</p>
-                    </div>
-                </div>
-                
-                <div class="kpi-card warning">
-                    <div class="kpi-icon">⏳</div>
-                    <div class="kpi-info">
-                        <h3 class="kpi-value"><%= kpis.pending_orders %></h3>
-                        <p class="kpi-label">Órdenes Pendientes</p>
-                    </div>
-                </div>
-                
-                <div class="kpi-card">
-                    <div class="kpi-icon">👥</div>
-                    <div class="kpi-info">
-                        <h3 class="kpi-value"><%= kpis.total_customers %></h3>
-                        <p class="kpi-label">Clientes Registrados</p>
-                    </div>
-                </div>
+        <div class="kpi-card">
+            <div class="kpi-icon"><i class="nav-icon fa-solid fa-receipt"></i></div>
+            <div class="kpi-info">
+                <h3 class="kpi-value"><%= kpis.total_orders %></h3>
+                <p class="kpi-label">Órdenes Totales</p>
             </div>
-
-            <!-- Sección de alertas y datos importantes -->
-            <div class="dashboard-grid">
-                <!-- Productos con stock bajo -->
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h2>⚠️ Stock Bajo</h2>
-                        <span class="badge"><%= lowStockProducts.length %></span>
-                    </div>
-                    <div class="card-body">
-                        <% if (lowStockProducts.length > 0) { %>
-                            <table class="simple-table">
-                                <thead>
-                                    <tr>
-                                        <th>Producto</th>
-                                        <th>Stock</th>
-                                        <th>Precio</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% lowStockProducts.forEach(product => { %>
-                                        <tr>
-                                            <td><%= product.product_name %></td>
-                                            <td><span class="badge-danger"><%= product.stock %></span></td>
-                                            <td>Q<%= parseFloat(product.price).toFixed(2) %></td>
-                                        </tr>
-                                    <% }); %>
-                                </tbody>
-                            </table>
-                        <% } else { %>
-                            <p class="empty-state">✅ Todos los productos tienen stock suficiente</p>
-                        <% } %>
-                    </div>
-                </div>
-
-                <!-- Órdenes recientes -->
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h2>🛒 Órdenes Recientes</h2>
-                        <a href="/admin/orders" class="btn-link">Ver todas →</a>
-                    </div>
-                    <div class="card-body">
-                        <% if (recentOrders.length > 0) { %>
-                            <table class="simple-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Cliente</th>
-                                        <th>Total</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% recentOrders.forEach(order => { %>
-                                        <tr>
-                                            <td>#<%= order.order_id %></td>
-                                            <td><%= order.customer_name || 'Invitado' %></td>
-                                            <td>Q<%= parseFloat(order.total).toFixed(2) %></td>
-                                            <td>
-                                                <span class="badge-<%= order.status.toLowerCase() %>">
-                                                    <%= order.status %>
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    <% }); %>
-                                </tbody>
-                            </table>
-                        <% } else { %>
-                            <p class="empty-state">No hay órdenes recientes</p>
-                        <% } %>
-                    </div>
-                </div>
+        </div>
+        
+        <div class="kpi-card">
+            <div class="kpi-icon"><i class="nav-icon fa-solid fa-dollar-sign"></i></div>
+            <div class="kpi-info">
+                <h3 class="kpi-value">Q<%= parseFloat(kpis.total_revenue).toFixed(2) %></h3>
+                <p class="kpi-label">Ingresos Totales</p>
             </div>
-
-            <!-- Acciones rápidas -->
-            <div class="quick-actions">
-                <h2>Acciones Rápidas</h2>
-                <div class="actions-grid">
-                    <a href="/admin/products/new" class="action-card">
-                        <span class="action-icon">➕</span>
-                        <span class="action-text">Nuevo Producto</span>
-                    </a>
-                    
-                    <a href="/admin/categories" class="action-card">
-                        <span class="action-icon">🏷️</span>
-                        <span class="action-text">Gestionar Categorías</span>
-                    </a>
-                    
-                    <a href="/admin/orders" class="action-card">
-                        <span class="action-icon">📋</span>
-                        <span class="action-text">Ver Órdenes</span>
-                    </a>
-                    
-                    <a href="/analytics" class="action-card">
-                        <span class="action-icon">📊</span>
-                        <span class="action-text">Reportes</span>
-                    </a>
-                </div>
+        </div>
+        
+        <div class="kpi-card warning">
+            <div class="kpi-icon"><i class="nav-icon fa-solid fa-clock"></i></div>
+            <div class="kpi-info">
+                <h3 class="kpi-value"><%= kpis.pending_orders %></h3>
+                <p class="kpi-label">Órdenes Pendientes</p>
             </div>
-        </main>
+        </div>
+        
+        <div class="kpi-card">
+            <div class="kpi-icon"><i class="nav-icon fa-solid fa-users"></i></div>
+            <div class="kpi-info">
+                <h3 class="kpi-value"><%= kpis.total_customers %></h3>
+                <p class="kpi-label">Clientes Registrados</p>
+            </div>
+        </div>
     </div>
-    
-    <!-- Scripts -->
-    <script src="/js/admin.js"></script>
-</body>
-</html>
+
+    <div class="dashboard-grid">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2><i class="fa-solid fa-triangle-exclamation"></i> Stock Bajo</h2>
+                <span class="badge"><%= lowStockProducts.length %></span>
+            </div>
+            <div class="card-body">
+                <% if (lowStockProducts.length > 0) { %>
+                    <table class="simple-table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Stock</th>
+                                <th>Precio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% lowStockProducts.forEach(product => { %>
+                                <tr>
+                                    <td><%= product.product_name %></td>
+                                    <td><span class="badge-danger"><%= product.total_stock %></span></td>
+                                    <td>Q<%= parseFloat(product.price).toFixed(2) %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <p class="empty-state"><i class="fa-solid fa-check-circle"></i> Todos los productos tienen stock suficiente</p>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2><i class="fa-solid fa-receipt"></i> Órdenes Recientes</h2>
+                <a href="/admin/orders" class="btn-link">Ver todas <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+            <div class="card-body">
+                <% if (recentOrders.length > 0) { %>
+                    <table class="simple-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% recentOrders.forEach(order => { %>
+                                <tr>
+                                    <td>#<%= order.order_id %></td>
+                                    <td><%= order.customer_name || 'Invitado' %></td>
+                                    <td>Q<%= parseFloat(order.total).toFixed(2) %></td>
+                                    <td>
+                                        <span class="badge-<%= order.status.toLowerCase() %>">
+                                            <%= order.status %>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <p class="empty-state">No hay órdenes recientes</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</main>

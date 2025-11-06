@@ -1,28 +1,97 @@
-<!-- public/views/admin/layout.ejs -->
+<!-- views/admin/layout.ejs -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title><%= title %> | Admin Sunset</title>
     
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <% if (typeof pageCSS !== 'undefined' && pageCSS === 'cropper') { %>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+    <% } %>
+    
+    <% if (typeof style !== 'undefined') { %>
+        <%- style %>
+    <% } %>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 <body class="admin-body">
+
+    <header class="admin-header-fixed">
+        <button class="admin-hamburger-btn" id="admin-hamburger-btn" aria-label="Abrir menú">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <h1 class="admin-header-title"><%= title %></h1>
+        <div class="admin-header-spacer">
+            <% if (typeof user !== 'undefined' && user) { %>
+                <span class="admin-user">
+                    <i class="<%= icons.userCircle %>" style="margin-right: 5px;"></i>
+                    <%= user.first_name || 'Admin' %>
+                </span>
+            <% } %>
+        </div>
+    </header>
+
+    <aside class="admin-sidebar-sliding" id="admin-sidebar-sliding">
+        <div class="sidebar-header">
+            <a href="/admin" class="sidebar-logo-link">
+                <h2>Artesanías Sunset</h2>
+            </a>
+            <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Cerrar menú">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="/admin" class="nav-item <%= (typeof page !== 'undefined' && page === 'dashboard') ? 'active' : '' %>">
+                <i class="nav-icon <%= icons.analytics %>"></i>
+                <span class="nav-text">Dashboard</span>
+            </a>
+            <a href="/admin/products" class="nav-item <%= (typeof page !== 'undefined' && page === 'products') ? 'active' : '' %>">
+                <i class="nav-icon <%= icons.catalogBag %>"></i>
+                <span class="nav-text">Productos</span>
+            </a>
+            <a href="/admin/categories" class="nav-item <%= (typeof page !== 'undefined' && page === 'categories') ? 'active' : '' %>">
+                <i class="nav-icon fa-solid fa-tags"></i>
+                <span class="nav-text">Categorías</span>
+            </a>
+            <a href="/admin/orders" class="nav-item <%= (typeof page !== 'undefined' && page === 'orders') ? 'active' : '' %>">
+                <i class="nav-icon fa-solid fa-receipt"></i>
+                <span class="nav-text">Órdenes</span>
+            </a>
+            <div class="nav-divider"></div>
+            <a href="/analytics" class="nav-item <%= (typeof page !== 'undefined' && page === 'analytics') ? 'active' : '' %>">
+                <i class="nav-icon <%= icons.analytics %>"></i>
+                <span class="nav-text">Analíticas</span>
+            </a>
+            <a href="/" class="nav-item">
+                <i class="nav-icon <%= icons.home %>"></i>
+                <span class="nav-text">Ver Tienda</span>
+            </a>
+            <div class="nav-divider"></div>
+            <a href="/auth/logout" class="nav-item">
+                <i class="nav-icon <%= icons.logout %>"></i>
+                <span class="nav-text">Cerrar Sesión</span>
+            </a>
+        </nav>
+    </aside>
+
+    <div class="admin-sidebar-overlay" id="admin-sidebar-overlay"></div>
     
-    <!-- [TU CONTENIDO ADMIN AQUÍ] -->
+    <main class="admin-main-content">
+        <%- body %>
+    </main>
     
-    <!-- jQuery -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    
-    <!-- Inicialización -->
-    <script src="/js/lucide-init.js"></script>
-    
-    <!-- Scripts admin -->
     <script src="/js/admin.js"></script>
+    
+    <% if (typeof script !== 'undefined') { %>
+        <%- script %>
+    <% } %>
+
 </body>
 </html>

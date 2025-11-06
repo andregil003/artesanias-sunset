@@ -1,285 +1,256 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
-    
-    <!-- CSS Base -->
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/admin.css">
-    
-    <!-- jQuery -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-</head>
-<body class="admin-body">
-    
-    <!-- Sidebar -->
-    <aside class="admin-sidebar">
-        <div class="sidebar-header">
-            <h2>🌅</h2>
-            <p>Artesanías Sunset</p>
-        </div>
-        
-        <nav class="sidebar-nav">
-            <a href="/admin" class="nav-item">
-                <span class="nav-icon">📊</span>
-                <span class="nav-text">Dashboard</span>
-            </a>
-            
-            <a href="/admin/products" class="nav-item active">
-                <span class="nav-icon">📦</span>
-                <span class="nav-text">Productos</span>
-            </a>
-            
-            <a href="/admin/categories" class="nav-item">
-                <span class="nav-icon">🏷️</span>
-                <span class="nav-text">Categorías</span>
-            </a>
-            
-            <a href="/admin/orders" class="nav-item">
-                <span class="nav-icon">🛒</span>
-                <span class="nav-text">Órdenes</span>
-            </a>
-            
-            <div class="nav-divider"></div>
-            
-            <a href="/analytics" class="nav-item">
-                <span class="nav-icon">📈</span>
-                <span class="nav-text">Analíticas</span>
-            </a>
-            
-            <a href="/" class="nav-item">
-                <span class="nav-icon">🏠</span>
-                <span class="nav-text">Ver Tienda</span>
-            </a>
-        </nav>
-    </aside>
-    
-    <!-- Main Content -->
-    <div class="admin-main">
-        <!-- Header -->
-        <header class="admin-header">
-            <div class="header-left">
-                <h1 class="page-title">Productos (<%= pagination.totalProducts %>)</h1>
-            </div>
-            <div class="header-right">
-                <a href="/admin/products/new" class="btn-primary">➕ Nuevo Producto</a>
-            </div>
-        </header>
-        
-        <!-- Content Area -->
-        <main class="admin-content">
-            
-            <!-- Filtros avanzados -->
-            <div class="filters-section">
-                <form method="GET" action="/admin/products" class="filters-form" id="filters-form">
-                    <!-- Búsqueda -->
-                    <div class="filter-group">
-                        <input 
-                            type="text" 
-                            name="search" 
-                            placeholder="🔍 Buscar por nombre..."
-                            value="<%= filters.search || '' %>"
-                            class="filter-input search-input"
-                        >
-                    </div>
-                    
-                    <!-- Categoría -->
-                    <div class="filter-group">
-                        <select name="category" class="filter-select">
-                            <option value="">📦 Todas las categorías</option>
-                            <% categories.forEach(cat => { %>
-                                <option value="<%= cat.category_name %>" <%= filters.category === cat.category_name ? 'selected' : '' %>>
-                                    <%= cat.category_name %>
-                                </option>
-                            <% }); %>
-                        </select>
-                    </div>
-                    
-                    <!-- Estado -->
-                    <div class="filter-group">
-                        <select name="status" class="filter-select">
-                            <option value="">🔘 Todos los estados</option>
-                            <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>✅ Activos</option>
-                            <option value="inactive" <%= filters.status === 'inactive' ? 'selected' : '' %>>❌ Inactivos</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Stock -->
-                    <div class="filter-group">
-                        <select name="stock" class="filter-select">
-                            <option value="">📊 Todo el stock</option>
-                            <option value="in-stock" <%= filters.stockFilter === 'in-stock' ? 'selected' : '' %>>✅ En stock</option>
-                            <option value="low-stock" <%= filters.stockFilter === 'low-stock' ? 'selected' : '' %>>⚠️ Stock bajo</option>
-                            <option value="out-of-stock" <%= filters.stockFilter === 'out-of-stock' ? 'selected' : '' %>>❌ Agotado</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Ordenamiento -->
-                    <div class="filter-group">
-                        <select name="sort" class="filter-select">
-                            <option value="newest" <%= filters.sortBy === 'newest' ? 'selected' : '' %>>🆕 Más recientes</option>
-                            <option value="oldest" <%= filters.sortBy === 'oldest' ? 'selected' : '' %>>🕐 Más antiguos</option>
-                            <option value="price-asc" <%= filters.sortBy === 'price-asc' ? 'selected' : '' %>>💰 Precio ⬆️</option>
-                            <option value="price-desc" <%= filters.sortBy === 'price-desc' ? 'selected' : '' %>>💰 Precio ⬇️</option>
-                            <option value="name" <%= filters.sortBy === 'name' ? 'selected' : '' %>>🔤 A-Z</option>
-                            <option value="name-desc" <%= filters.sortBy === 'name-desc' ? 'selected' : '' %>>🔤 Z-A</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Botones -->
-                    <button type="submit" class="btn-filter">Filtrar</button>
-                    <a href="/admin/products" class="btn-reset">Limpiar filtros</a>
-                </form>
-            </div>
+<!-- views/admin/products-list.ejs -->
+<header class="admin-header">
+    <div class="header-left">
+        <h1 class="page-title">Productos (<%= pagination.totalProducts %>)</h1>
+    </div>
+    <div class="header-right">
+        <button class="btn-secondary btn-small btn-filter-toggle" id="btn-filter-toggle">
+            <i class="fa-solid fa-filter"></i> Filtrar
+        </button>
+        <a href="/admin/products/new" class="btn-primary">
+            <i class="fa-solid fa-plus"></i> 
+            <span class="hide-mobile">Nuevo Producto</span>
+        </a>
+    </div>
+</header>
 
-            <!-- Información de resultados -->
-            <div class="results-info">
-                <% if (pagination.showAll) { %>
-                    📋 Mostrando todos los <%= pagination.totalProducts %> productos
-                <% } else { %>
-                    📋 Mostrando <%= products.length %> de <%= pagination.totalProducts %> productos
-                    (Página <%= pagination.currentPage %> de <%= pagination.totalPages %>)
-                <% } %>
+<main class="admin-content">
+    
+    <div class="filters-section">
+        <form method="GET" action="/admin/products" class="filters-form" id="filters-form-desktop">
+            <div class="filter-group">
+                <input type="text" name="search" placeholder="Buscar por nombre..." value="<%= filters.search || '' %>" class="filter-input search-input">
             </div>
-
-            <!-- Tabla de productos -->
-            <div class="table-container">
-                <% if (products.length > 0) { %>
-                    <table class="products-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Imagen</th>
-                                <th>Nombre</th>
-                                <th>Categoría</th>
-                                <th>Precio</th>
-                                <th>Stock</th>
-                                <th>Variantes</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% products.forEach(product => { %>
-                                <tr data-product-id="<%= product.product_id %>">
-                                    <td>#<%= product.product_id %></td>
-                                    <td>
-                                        <% if (product.image_url) { %>
-                                            <img src="<%= product.image_url %>" alt="<%= product.product_name %>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
-                                        <% } else { %>
-                                            <span style="font-size: 2rem;">📷</span>
-                                        <% } %>
-                                    </td>
-                                    <td class="product-name"><%= product.product_name %></td>
-                                    <td><%= product.category_name || 'Sin categoría' %></td>
-                                    <td class="product-price">Q<%= parseFloat(product.price).toFixed(2) %></td>
-                                    <td>
-                                        <span class="stock-badge <%= product.total_stock < 5 ? 'low-stock' : '' %>">
-                                            <%= product.total_stock %>
-                                        </span>
-                                    </td>
-                                    <td><%= product.variant_count %></td>
-                                    <td>
-                                        <% if (product.is_active) { %>
-                                            <span class="status-badge active">Activo</span>
-                                        <% } else { %>
-                                            <span class="status-badge inactive">Inactivo</span>
-                                        <% } %>
-                                    </td>
-                                    <td class="actions-cell">
-                                        <a href="/admin/products/<%= product.product_id %>/edit" class="btn-action edit" title="Editar">
-                                            ✏️
-                                        </a>
-                                        <button class="btn-action delete" data-id="<%= product.product_id %>" title="Desactivar">
-                                            🗑️
-                                        </button>
-                                    </td>
-                                </tr>
-                            <% }); %>
-                        </tbody>
-                    </table>
-                <% } else { %>
-                    <div class="empty-state">
-                        <p>📭 No se encontraron productos con los filtros aplicados</p>
-                        <a href="/admin/products" class="btn-primary">Ver todos</a>
-                    </div>
-                <% } %>
+            <div class="filter-group">
+                <select name="category" class="filter-select">
+                    <option value="">Todas las categorías</option>
+                    <% categories.forEach(cat => { %>
+                        <option value="<%= cat.category_name %>" <%= filters.category === cat.category_name ? 'selected' : '' %>>
+                            <%= cat.category_name %>
+                        </option>
+                    <% }); %>
+                </select>
             </div>
+            <div class="filter-group">
+                <select name="status" class="filter-select">
+                    <option value="">Todos los estados</option>
+                    <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Activos</option>
+                    <option value="inactive" <%= filters.status === 'inactive' ? 'selected' : '' %>>Inactivos</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <select name="stock" class="filter-select">
+                    <option value="">Todo el stock</option>
+                    <option value="in-stock" <%= filters.stockFilter === 'in-stock' ? 'selected' : '' %>>En stock</option>
+                    <option value="low-stock" <%= filters.stockFilter === 'low-stock' ? 'selected' : '' %>>Stock bajo</option>
+                    <option value="out-of-stock" <%= filters.stockFilter === 'out-of-stock' ? 'selected' : '' %>>Agotado</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <select name="sort" class="filter-select">
+                    <option value="newest" <%= filters.sortBy === 'newest' ? 'selected' : '' %>>Más recientes</option>
+                    <option value="oldest" <%= filters.sortBy === 'oldest' ? 'selected' : '' %>>Más antiguos</option>
+                    <option value="price-asc" <%= filters.sortBy === 'price-asc' ? 'selected' : '' %>>Precio (Asc)</option>
+                    <option value="price-desc" <%= filters.sortBy === 'price-desc' ? 'selected' : '' %>>Precio (Desc)</option>
+                    <option value="name" <%= filters.sortBy === 'name' ? 'selected' : '' %>>Nombre (A-Z)</option>
+                    <option value="name-desc" <%= filters.sortBy === 'name-desc' ? 'selected' : '' %>>Nombre (Z-A)</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-filter">Filtrar</button>
+            <a href="/admin/products" class="btn-reset">Limpiar</a>
+        </form>
+    </div>
 
-            <!-- Paginación -->
+    <div class="results-info">
+        <i class="fa-solid fa-list-check"></i>
+        <% if (pagination.showAll) { %>
+            Mostrando todos los <%= pagination.totalProducts %> productos
+        <% } else { %>
+            Mostrando <%= products.length %> de <%= pagination.totalProducts %> productos
+            (Página <%= pagination.currentPage %> de <%= pagination.totalPages %>)
+        <% } %>
+    </div>
+
+    <div class="table-container">
+        <% if (products.length > 0) { %>
+            <table class="products-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Imagen</th>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% products.forEach(product => { %>
+                        <tr data-product-id="<%= product.product_id %>">
+                            <td data-label="ID">#<%= product.product_id %></td>
+                            <td data-label="Imagen">
+                                <% if (product.image_url) { %>
+                                    <img src="<%= product.image_url %>" alt="<%= product.product_name %>">
+                                <% } else { %>
+                                    <span><i class="fa-solid fa-image"></i></span>
+                                <% } %>
+                            </td>
+                            <td data-label="Nombre" class="product-name"><%= product.product_name %></td>
+                            <td data-label="Categoría"><%= product.category_name || 'Sin categoría' %></td>
+                            <td data-label="Precio" class="product-price">Q<%= parseFloat(product.price).toFixed(2) %></td>
+                            <td data-label="Stock">
+                                <span class="stock-badge <%= product.total_stock < 5 ? (product.total_stock === 0 ? 'out-of-stock' : 'low-stock') : '' %>">
+                                    <%= product.total_stock %>
+                                </span>
+                            </td>
+                            <td data-label="Estado">
+                                <% if (product.is_active) { %>
+                                    <span class="status-badge active">Activo</span>
+                                <% } else { %>
+                                    <span class="status-badge inactive">Inactivo</span>
+                                <% } %>
+                            </td>
+                            <td data-label="Acciones" class="actions-cell">
+                                <a href="/admin/products/<%= product.product_id %>/edit" class="btn-action edit" title="Editar">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </a>
+                                <button class="btn-action delete" data-id="<%= product.product_id %>" title="Desactivar">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <div class="empty-state">
+                <p><i class="fa-solid fa-box-open"></i> No se encontraron productos con los filtros aplicados</p>
+                <a href="/admin/products" class="btn-primary">Ver todos</a>
+            </div>
+        <% } %>
+    </div>
+
+    <% 
+    function buildPaginationUrl(page) {
+        // (Tu función de paginación... idéntica a la anterior)
+        let url = `/admin/products?page=${page}`;
+        if (filters.search) url += `&search=${encodeURIComponent(filters.search)}`;
+        if (filters.category) url += `&category=${encodeURIComponent(filters.category)}`;
+        if (filters.status) url += `&status=${filters.status}`;
+        if (filters.stockFilter) url += `&stock=${filters.stockFilter}`;
+        if (filters.sortBy) url += `&sort=${filters.sortBy}`;
+        if (filters.minPrice > 0) url += `&min_price=${filters.minPrice}`;
+        if (filters.maxPrice) url += `&max_price=${filters.maxPrice}`;
+        return url;
+    }
+    %>
+    
+    <% if (!pagination.showAll && pagination.totalPages > 1 && products.length > 0) { %>
+    <div class="pagination-controls">
+        <% if (pagination.hasPrev) { %>
+            <a href="<%= buildPaginationUrl(pagination.currentPage - 1) %>" class="pagination-btn"><i class="fa-solid fa-chevron-left"></i></a>
+        <% } %>
+        <div class="pagination-numbers">
             <% 
-            function buildPaginationUrl(page) {
-                let url = `/admin/products?page=${page}`;
-                if (filters.search) url += `&search=${encodeURIComponent(filters.search)}`;
-                if (filters.category) url += `&category=${encodeURIComponent(filters.category)}`;
-                if (filters.status) url += `&status=${filters.status}`;
-                if (filters.stockFilter) url += `&stock=${filters.stockFilter}`;
-                if (filters.sortBy) url += `&sort=${filters.sortBy}`;
-                if (filters.minPrice > 0) url += `&min_price=${filters.minPrice}`;
-                if (filters.maxPrice) url += `&max_price=${filters.maxPrice}`;
-                return url;
+            const maxVisible = 5;
+            let startPage = Math.max(1, pagination.currentPage - 2);
+            let endPage = Math.min(pagination.totalPages, startPage + maxVisible - 1);
+            if (endPage - startPage < maxVisible - 1) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
             }
             %>
-            
-            <% if (!pagination.showAll && pagination.totalPages > 1 && products.length > 0) { %>
-            <div class="pagination-controls">
-                <% if (pagination.hasPrev) { %>
-                    <a href="<%= buildPaginationUrl(pagination.currentPage - 1) %>" class="pagination-btn">←</a>
-                <% } %>
-                
-                <div class="pagination-numbers">
-                    <% 
-                    const maxVisible = 5;
-                    let startPage = Math.max(1, pagination.currentPage - 2);
-                    let endPage = Math.min(pagination.totalPages, startPage + maxVisible - 1);
-                    
-                    if (endPage - startPage < maxVisible - 1) {
-                        startPage = Math.max(1, endPage - maxVisible + 1);
-                    }
-                    %>
-                    
-                    <% for (let i = startPage; i <= endPage; i++) { %>
-                        <a href="<%= buildPaginationUrl(i) %>" 
-                           class="pagination-number <%= i === pagination.currentPage ? 'active' : '' %>">
-                            <%= i %>
-                        </a>
-                    <% } %>
-                    
-                    <% if (endPage < pagination.totalPages) { %>
-                        <% if (endPage < pagination.totalPages - 1) { %>
-                            <span class="pagination-dots">...</span>
-                        <% } %>
-                        <a href="<%= buildPaginationUrl(pagination.totalPages) %>" class="pagination-number">
-                            <%= pagination.totalPages %>
-                        </a>
-                    <% } %>
-                </div>
-                
-                <% if (pagination.hasNext) { %>
-                    <a href="<%= buildPaginationUrl(pagination.currentPage + 1) %>" class="pagination-btn">→</a>
-                <% } %>
-            </div>
-
-            <div class="view-all-section">
-                <a href="<%= buildPaginationUrl(1).replace('page=1', 'all=true') %>" class="btn-secondary">
-                    📋 Ver todos los productos
+            <% for (let i = startPage; i <= endPage; i++) { %>
+                <a href="<%= buildPaginationUrl(i) %>" class="pagination-number <%= i === pagination.currentPage ? 'active' : '' %>">
+                    <%= i %>
                 </a>
-            </div>
-            <% } else if (pagination.showAll && products.length > 0) { %>
-            <div class="view-all-section">
-                <a href="/admin/products" class="btn-secondary">
-                    ← Volver a paginación
-                </a>
-            </div>
             <% } %>
-
-        </main>
+            <% if (endPage < pagination.totalPages) { %>
+                <% if (endPage < pagination.totalPages - 1) { %>
+                    <span class="pagination-dots">...</span>
+                <% } %>
+                <a href="<%= buildPaginationUrl(pagination.totalPages) %>" class="pagination-number">
+                    <%= pagination.totalPages %>
+                </a>
+            <% } %>
+        </div>
+        <% if (pagination.hasNext) { %>
+            <a href="<%= buildPaginationUrl(pagination.currentPage + 1) %>" class="pagination-btn"><i class="fa-solid fa-chevron-right"></i></a>
+        <% } %>
     </div>
-    
-    <!-- Scripts -->
-    <script src="/js/admin.js"></script>
-    <script src="/js/admin-products.js"></script>
-</body>
-</html>
+    <div class="view-all-section">
+        <a href="<%= buildPaginationUrl(1).replace('page=1', 'all=true') %>" class="btn-secondary">
+            <i class="fa-solid fa-list-check"></i> Ver todos los productos
+        </a>
+    </div>
+    <% } else if (pagination.showAll && products.length > 0) { %>
+    <div class="view-all-section">
+        <a href="/admin/products" class="btn-secondary">
+            <i class="fa-solid fa-chevron-left"></i> Volver a paginación
+        </a>
+    </div>
+    <% } %>
+
+</main>
+
+<div class="filter-modal-overlay" id="filter-modal-overlay"></div>
+<div class="filter-modal" id="filter-modal">
+    <div class="modal-header">
+        <h3><i class="fa-solid fa-filter"></i> Filtrar Productos</h3>
+        <button class="modal-close" id="filter-modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+        <form method="GET" action="/admin/products" class="filters-form" id="filters-form-modal">
+            <div class="filter-group">
+                <label for="filter-search-modal">Nombre</label>
+                <input type="text" id="filter-search-modal" name="search" placeholder="Buscar por nombre..." value="<%= filters.search || '' %>" class="filter-input search-input">
+            </div>
+            <div class="filter-group">
+                <label for="filter-category-modal">Categoría</label>
+                <select id="filter-category-modal" name="category" class="filter-select">
+                    <option value="">Todas las categorías</option>
+                    <% categories.forEach(cat => { %>
+                        <option value="<%= cat.category_name %>" <%= filters.category === cat.category_name ? 'selected' : '' %>>
+                            <%= cat.category_name %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-status-modal">Estado</label>
+                <select id="filter-status-modal" name="status" class="filter-select">
+                    <option value="">Todos los estados</option>
+                    <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Activos</option>
+                    <option value="inactive" <%= filters.status === 'inactive' ? 'selected' : '' %>>Inactivos</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-stock-modal">Stock</label>
+                <select id="filter-stock-modal" name="stock" class="filter-select">
+                    <option value="">Todo el stock</option>
+                    <option value="in-stock" <%= filters.stockFilter === 'in-stock' ? 'selected' : '' %>>En stock</ok>
+                    <option value="low-stock" <%= filters.stockFilter === 'low-stock' ? 'selected' : '' %>>Stock bajo</option>
+                    <option value="out-of-stock" <%= filters.stockFilter === 'out-of-stock' ? 'selected' : '' %>>Agotado</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-sort-modal">Ordenar por</label>
+                <select id="filter-sort-modal" name="sort" class="filter-select">
+                    <option value="newest" <%= filters.sortBy === 'newest' ? 'selected' : '' %>>Más recientes</option>
+                    <option value="oldest" <%= filters.sortBy === 'oldest' ? 'selected' : '' %>>Más antiguos</option>
+                    <option value="price-asc" <%= filters.sortBy === 'price-asc' ? 'selected' : '' %>>Precio (Asc)</option>
+                    <option value="price-desc" <%= filters.sortBy === 'price-desc' ? 'selected' : '' %>>Precio (Desc)</option>
+                    <option value="name" <%= filters.sortBy === 'name' ? 'selected' : '' %>>Nombre (A-Z)</option>
+                    <option value="name-desc" <%= filters.sortBy === 'name-desc' ? 'selected' : '' %>>Nombre (Z-A)</option>
+                </select>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <a href="/admin/products" class="btn-secondary">Limpiar</a>
+        <button type="submit" class="btn-primary" form="filters-form-modal">Aplicar Filtros</button>
+    </div>
+</div>
+
+<script src="/js/admin-products.js"></script>

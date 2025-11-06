@@ -1,13 +1,12 @@
-<!-- analytics.ejs -->
+<!-- views/pages/analytics.ejs -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title><%= title %></title>
     
     <!-- CSS -->
-    
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/header.css">
     <link rel="stylesheet" href="/css/footer.css">
@@ -15,117 +14,21 @@
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        /* Modal Styles */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 9998;
-            animation: fadeIn 0.3s;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            max-width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            z-index: 9999;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.3s;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #eee;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            color: var(--c5);
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 2rem;
-            cursor: pointer;
-            color: #999;
-            transition: color 0.3s;
-        }
-
-        .modal-close:hover {
-            color: #333;
-        }
-
-        .modal-content {
-            margin-bottom: 1.5rem;
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid #eee;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -40%);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, -50%);
-            }
-        }
-
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: #999;
-        }
-    </style>
-    
-    <!-- jQuery -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 <body>
     <%- include('../partials/header') %>
 
     <main class="analytics-container">
-        <!-- Encabezado -->
+        <!-- Header -->
         <div class="analytics-header">
-            <h1>📊 Dashboard de Analítica</h1>
+            <h1><i class="fa-solid fa-chart-line"></i> Dashboard de Analítica</h1>
             <p>Métricas y estadísticas del negocio</p>
         </div>
 
         <!-- KPIs Principales -->
         <section class="kpi-grid">
             <div class="kpi-card">
-                <div class="kpi-icon">👥</div>
+                <div class="kpi-icon"><i class="fa-solid fa-users"></i></div>
                 <div class="kpi-content">
                     <h3>Clientes</h3>
                     <p class="kpi-value"><%= kpis.total_customers %></p>
@@ -133,7 +36,7 @@
             </div>
 
             <div class="kpi-card">
-                <div class="kpi-icon">📦</div>
+                <div class="kpi-icon"><i class="fa-solid fa-box"></i></div>
                 <div class="kpi-content">
                     <h3>Productos</h3>
                     <p class="kpi-value"><%= kpis.total_products %></p>
@@ -141,7 +44,7 @@
             </div>
 
             <div class="kpi-card">
-                <div class="kpi-icon">🛒</div>
+                <div class="kpi-icon"><i class="fa-solid fa-shopping-cart"></i></div>
                 <div class="kpi-content">
                     <h3>Órdenes</h3>
                     <p class="kpi-value"><%= kpis.total_orders %></p>
@@ -149,7 +52,7 @@
             </div>
 
             <div class="kpi-card highlight">
-                <div class="kpi-icon">💰</div>
+                <div class="kpi-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
                 <div class="kpi-content">
                     <h3>Ingresos Totales</h3>
                     <%
@@ -172,7 +75,7 @@
             </div>
 
             <div class="kpi-card">
-                <div class="kpi-icon">📈</div>
+                <div class="kpi-icon"><i class="fa-solid fa-chart-simple"></i></div>
                 <div class="kpi-content">
                     <h3>Ticket Promedio</h3>
                     <%
@@ -191,7 +94,7 @@
             </div>
 
             <div class="kpi-card alert">
-                <div class="kpi-icon">⏳</div>
+                <div class="kpi-icon"><i class="fa-solid fa-clock"></i></div>
                 <div class="kpi-content">
                     <h3>Órdenes Pendientes</h3>
                     <p class="kpi-value"><%= kpis.pending_orders %></p>
@@ -202,11 +105,10 @@
         <!-- Ventas por Moneda -->
         <% if (salesByCurrency && salesByCurrency.length > 0) { %>
         <section class="data-section">
-            <h2>💱 Ventas por Moneda</h2>
+            <h2><i class="fa-solid fa-money-bill-transfer"></i> Ventas por Moneda</h2>
             <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
                 <% salesByCurrency.forEach(currency => { %>
                 <div class="kpi-card">
-
                     <div class="kpi-content">
                         <h3><%= currency.currency_code %></h3>
                         <p class="kpi-value"><%= parseInt(currency.total_orders) %> órdenes</p>
@@ -222,7 +124,7 @@
                             formatted = revenue.toFixed(2);
                         }
                         %>
-                        <p style="color: var(--c6); font-size: 1.2rem; margin-top: 0.5rem;">
+                        <p style="color: #666; font-size: 1.2rem; margin-top: 0.5rem;">
                             <%= symbol %> <%= formatted %>
                         </p>
                     </div>
@@ -235,19 +137,19 @@
         <!-- Gráficos -->
         <section class="charts-section">
             <div class="chart-container">
-                <h2>📊 Ventas por Categoría</h2>
+                <h2><i class="fa-solid fa-chart-column"></i> Ventas por Categoría</h2>
                 <canvas id="salesByCategoryChart"></canvas>
             </div>
 
             <div class="chart-container">
-                <h2>📈 Ingresos Mensuales</h2>
+                <h2><i class="fa-solid fa-chart-line"></i> Ingresos Mensuales</h2>
                 <canvas id="monthlyRevenueChart"></canvas>
             </div>
         </section>
 
         <!-- Top Productos -->
         <section class="data-section">
-            <h2>🏆 Top 5 Productos Más Vendidos</h2>
+            <h2><i class="fa-solid fa-trophy"></i> Top 5 Productos Más Vendidos</h2>
             <div class="table-responsive">
                 <table class="analytics-table">
                     <thead>
@@ -281,7 +183,7 @@
         <!-- Alertas de Stock Bajo -->
         <% if (lowStock && lowStock.length > 0) { %>
         <section class="data-section alert-section">
-            <h2>⚠️ Productos con Stock Bajo (< 10 unidades)</h2>
+            <h2><i class="fa-solid fa-triangle-exclamation"></i> Productos con Stock Bajo (< 10 unidades)</h2>
             <div class="table-responsive">
                 <table class="analytics-table">
                     <thead>
@@ -311,41 +213,41 @@
 
         <!-- Tarjetas de Vistas -->
         <section class="views-section">
-            <h2>📋 Reportes Detallados</h2>
+            <h2><i class="fa-solid fa-clipboard-list"></i> Reportes Detallados</h2>
             
             <div class="views-grid">
                 <div class="view-card" data-view="sales" data-endpoint="/analytics/sales-by-category">
-                    <span class="view-icon">💰</span>
+                    <span class="view-icon"><i class="fa-solid fa-money-bill-wave"></i></span>
                     <h3>Ventas por Categoría</h3>
                     <p>Ver análisis completo</p>
                 </div>
 
                 <div class="view-card" data-view="products" data-endpoint="/analytics/top-products">
-                    <span class="view-icon">🏆</span>
+                    <span class="view-icon"><i class="fa-solid fa-trophy"></i></span>
                     <h3>Top Productos</h3>
                     <p>Los 10 más vendidos</p>
                 </div>
 
                 <div class="view-card" data-view="customers" data-endpoint="/analytics/customer-orders">
-                    <span class="view-icon">👥</span>
+                    <span class="view-icon"><i class="fa-solid fa-users"></i></span>
                     <h3>Valor de Clientes</h3>
                     <p>Lifetime value</p>
                 </div>
 
                 <div class="view-card" data-view="shipments" data-endpoint="/analytics/pending-shipments">
-                    <span class="view-icon">📦</span>
+                    <span class="view-icon"><i class="fa-solid fa-box"></i></span>
                     <h3>Órdenes Pendientes</h3>
                     <p>Sin enviar o en proceso</p>
                 </div>
 
                 <div class="view-card" data-view="revenue" data-endpoint="/analytics/monthly-revenue">
-                    <span class="view-icon">📈</span>
+                    <span class="view-icon"><i class="fa-solid fa-chart-line"></i></span>
                     <h3>Ingresos Mensuales</h3>
                     <p>Tendencias por mes</p>
                 </div>
 
                 <div class="view-card" data-view="stock" data-endpoint="/analytics/low-stock">
-                    <span class="view-icon">⚠️</span>
+                    <span class="view-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
                     <h3>Stock Bajo</h3>
                     <p>Necesitan reabastecimiento</p>
                 </div>
@@ -354,25 +256,30 @@
     </main>
 
     <!-- Modal -->
-    <div class="modal-overlay" id="modalOverlay"></div>
-    <div class="modal" id="dataModal">
-        <div class="modal-header">
-            <h2 id="modalTitle"></h2>
-            <button class="modal-close" id="modalClose">&times;</button>
+    <div class="modal-overlay" id="modalOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 9998;"></div>
+    <div class="modal" id="dataModal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 12px; max-width: 90%; max-height: 90vh; overflow: auto; display: none; z-index: 9999; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+        <div class="modal-header" style="padding: 1.5rem; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center;">
+            <h2 id="modalTitle" style="margin: 0; font-size: 1.5rem;"></h2>
+            <button class="modal-close" id="modalClose" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999;">&times;</button>
         </div>
-        <div class="modal-content" id="modalContent">
+        <div class="modal-content" id="modalContent" style="padding: 1.5rem;">
             <div class="loading">Cargando datos...</div>
         </div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" id="downloadBtn">📥 Descargar CSV</button>
-            <button class="btn btn-primary" id="closeModalBtn">Cerrar</button>
+        <div class="modal-footer" style="padding: 1.5rem; border-top: 1px solid #e9ecef; display: flex; justify-content: flex-end; gap: 1rem;">
+            <button class="btn btn-secondary" id="downloadBtn" style="padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; background: #6c757d; color: white;">
+                <i class="fa-solid fa-download"></i> Descargar CSV
+            </button>
+            <button class="btn btn-primary" id="closeModalBtn" style="padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; background: var(--c1, #ff7f3f); color: white;">Cerrar</button>
         </div>
     </div>
 
     <%- include('../partials/footer') %>
 
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     
     <script>
         const salesByCategory = <%- JSON.stringify(salesByCategory) %>;
@@ -464,20 +371,29 @@
         });
 
         // Modal functionality
-        const modal = $('#dataModal');
-        const overlay = $('#modalOverlay');
+        const modal = document.getElementById('dataModal');
+        const overlay = document.getElementById('modalOverlay');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalContent');
+        const modalClose = document.getElementById('modalClose');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        
         let currentEndpoint = '';
         let currentData = [];
 
-        $('.view-card').on('click', async function() {
-            const title = $(this).find('h3').text();
-            const endpoint = $(this).data('endpoint');
+        document.querySelector('.views-grid').addEventListener('click', async (e) => {
+            const card = e.target.closest('.view-card');
+            if (!card) return;
+            
+            const title = card.querySelector('h3').textContent;
+            const endpoint = card.dataset.endpoint;
             currentEndpoint = endpoint;
             
-            $('#modalTitle').text(title);
-            $('#modalContent').html('<div class="loading">Cargando datos...</div>');
-            modal.show();
-            overlay.show();
+            modalTitle.textContent = title;
+            modalContent.innerHTML = '<div class="loading">Cargando datos...</div>';
+            modal.style.display = 'block';
+            overlay.style.display = 'block';
             
             try {
                 const response = await fetch(endpoint);
@@ -487,16 +403,17 @@
                     currentData = result.data;
                     displayData(result.data);
                 } else {
-                    $('#modalContent').html('<p>No hay datos disponibles</p>');
+                    modalContent.innerHTML = '<p>No hay datos disponibles</p>';
                 }
             } catch (error) {
-                $('#modalContent').html('<p>Error al cargar datos</p>');
+                console.error('Error loading data:', error);
+                modalContent.innerHTML = '<p>Error al cargar datos</p>';
             }
         });
 
         function displayData(data) {
             if (!data || data.length === 0) {
-                $('#modalContent').html('<p>No hay datos disponibles</p>');
+                modalContent.innerHTML = '<p>No hay datos disponibles</p>';
                 return;
             }
 
@@ -518,17 +435,19 @@
             });
             
             html += '</tbody></table></div>';
-            $('#modalContent').html(html);
+            modalContent.innerHTML = html;
         }
 
         function closeModal() {
-            modal.hide();
-            overlay.hide();
+            modal.style.display = 'none';
+            overlay.style.display = 'none';
         }
 
-        $('#modalClose, #closeModalBtn, #modalOverlay').on('click', closeModal);
+        modalClose.addEventListener('click', closeModal);
+        closeModalBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', closeModal);
 
-        $('#downloadBtn').on('click', function() {
+        downloadBtn.addEventListener('click', () => {
             const type = currentEndpoint.split('/').pop();
             window.location.href = `/analytics/download-report?type=${type}`;
         });
